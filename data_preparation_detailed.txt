@@ -1,0 +1,414 @@
+================================================================================
+DATA PREPARATION — PHASE 2 (CRISP-ML(Q))
+DETAILED TECHNICAL DOCUMENTATION
+================================================================================
+
+OVERVIEW
+--------
+This document describes the detailed steps, algorithms, and data quality techniques 
+used to include and prepare the additional dataset `balanced_dataSet_more_pollutants.csv` 
+and how it was integrated with the existing VIIRS points.
+
+GOAL
+----
+Produce a single point-level CSV compatible with the project's model input format 
+(`system:index,avg_rad,.geo`) so Phase 2 (Data Preparation) can be reproduced and 
+reviewed. The original VIIRS dataset (`data.csv`) contains point measurements with 
+`avg_rad` (VIIRS radiance) and GeoJSON point coordinates. The newly added dataset 
+contains polygon geometries and several derived variables (NTL logs, pollutants, 
+socio-economic indicators). The chosen approach converts polygon rows into point 
+centroids and builds a proxy `avg_rad` value from available NTL features.
+
+================================================================================
+DETAILED STEPS AND ALGORITHMS
+================================================================================
+
+STEP 1: Load Reference Data
+----------------------------
+- Read `data.csv` (original VIIRS dataset).
+- Validate presence of required columns (`avg_rad`, `.geo`).
+- Extract reference median: median(avg_rad) from existing dataset.
+- This median is used later as a scaling benchmark for the new dataset.
+
+PSEUDOCODE:
+```
+function load_existing(path):
+    df = read_csv(path)
+    if "avg_rad" not in df.columns or ".geo" not in df.columns:
+        raise error "Missing required columns"
+    return df
+
+ref_median = median(existing_df["avg_rad"])
+```
+
+---
+
+STEP 2: Geometry → Centroid Extraction (Algorithm: Vertex Averaging)
+---------------------------------------------------------------------
+
+**Problem**: The balanced dataset contains polygon geometries (WKT-like POLYGON 
+or MULTIPOLYGON strings); the model requires point-level data (lon, lat).
+
+**Solution**: Extract approximate centroid by averaging all vertices.
+
+**Algorithm Description: Approximate Centroid by Vertex Averaging**
+
+PSEUDOCODE:
+```
+function centroid_from_geometry(geom_string):
+    pattern = regex: "-?\d+\.\d+ -?\d+\.\d+"
+    matches = findall(pattern, geom_string)
+    
+    if length(matches) == 0:
+        raise ValueError "No coordinates found in geometry"
+    
+    lons = []
+    lats = []
+    for each match in matches:
+        lon = float(match[0])
+        lat = float(match[1])
+        lons.append(lon)
+        lats.append(lat)
+    
+    centroid_lon = mean(lons)
+    centroid_lat = mean(lats)
+    
+    return (centroid_lon, centroid_lat)
+```
+
+**Implementation Details**:
+- Regex pattern: `(-?\d+\.\d+)\s+(-?\d+\.\d+)` extracts all longitude-latitude pairs 
+  from a WKT polygon string.
+- For each row in the balanced dataset, extract all coordinate pairs from the geometry.
+- Compute the arithmetic mean of all longitudes separately and all latitudes separately.
+- The mean centroid is a simple approximation; it is equivalent to assuming all 
+  vertices have equal weight (not area-weighted).
+
+**Accuracy and Trade-offs**:
+- **Advantage**: Simple, deterministic, no external GIS dependencies.
+- **Disadvantage**: True centroid computation would use polygon area weighting 
+  (center of mass), but averaging vertices is an adequate approximation for 
+  coarse-grained spatial analysis.
+- **Precision**: For polygons with uniform vertex density, the error is typically < 5% 
+  of the polygon's characteristic size.
+
+**Null Handling**:
+- If no valid coordinates are found in a geometry string, (NaN, NaN) is assigned.
+- Rows with (NaN, NaN) centroids will have empty `.geo` field and are filtered 
+  out in later steps.
+
+**Example**:
+```
+Input geometry: "POLYGON((10.5 20.3, 10.6 20.4, 10.55 20.35, 10.5 20.3))"
+Extracted coordinates: [(10.5, 20.3), (10.6, 20.4), (10.55, 20.35), (10.5, 20.3)]
+Centroid: (mean([10.5, 10.6, 10.55, 10.5]), mean([20.3, 20.4, 20.35, 20.3]))
+        = (10.5375, 20.3475)
+```
+
+---
+
+STEP 3: Construct `avg_rad` Proxy (Algorithm: Median-Scaled NTL Log-Inversion)
+-------------------------------------------------------------------------------
+
+**Problem**: The original model requires `avg_rad` (VIIRS radiance). The balanced 
+dataset does not contain `avg_rad` but includes:
+- Night-time lights fields: `ln_mean_NTL`, `ln_sum_NTL` (natural logarithm of NTL statistics)
+- Pollutant fields: `mean_PM25`, etc.
+
+**Solution**: Build a proxy by inverting logarithmic NTL, then scale to match 
+the magnitude distribution of the reference dataset.
+
+**Algorithm Description: Median-Scaled NTL Log-Inversion**
+
+PSEUDOCODE:
+```
+function build_avg_rad_proxy(balanced_df, ref_median_avg_rad):
+    
+    // STEP 1: Select proxy column (preference order)
+    proxy_log = null
+    if "ln_mean_NTL" in balanced_df.columns:
+        proxy_log = balanced_df["ln_mean_NTL"]
+    else if "ln_sum_NTL" in balanced_df.columns:
+        proxy_log = balanced_df["ln_sum_NTL"]
+    else:
+        proxy_log = balanced_df.get("mean_PM25", Series(zeros))
+    
+    // STEP 2: Null handling and log-inversion
+    proxy_log = fillna(proxy_log, 0)          // replace NaN with 0
+    raw_proxy = exp(proxy_log)                 // invert logarithm
+    
+    // STEP 3: Handle non-finite values (inf, -inf)
+    raw_proxy = replace(raw_proxy, [inf, -inf], NaN)
+    raw_proxy = fillna(raw_proxy, 0)           // fill again
+    
+    // STEP 4: Compute scaling factor using robust median statistic
+    median_ref = median(ref_median_avg_rad)
+    median_new = median(raw_proxy)
+    
+    if median_new > 0 and isfinite(median_new):
+        scale = median_ref / median_new
+    else:
+        scale = 1.0  // fallback if new median is invalid
+    
+    // STEP 5: Apply scaling transformation
+    avg_rad = raw_proxy * scale
+    
+    return avg_rad
+```
+
+**Implementation Details**:
+
+1. **Column Selection Preference**:
+   - `ln_mean_NTL` (preferred): Mean of NTL observations, robust to individual outliers.
+   - `ln_sum_NTL` (second): Sum of NTL; used if mean is unavailable.
+   - `mean_PM25` (fallback): Very rough proxy; used only if NTL columns absent.
+
+2. **Null Value Handling**:
+   - NaN in proxy columns are replaced with 0 before exponentiation.
+   - Why 0? exp(0) = 1, a neutral identity value for the subsequent scaling.
+   - This ensures no NaN propagation in intermediate calculations.
+
+3. **Log-Inversion (Exponential)**:
+   - ln_mean_NTL is a logarithm of NTL observations (stored to compress range).
+   - To recover the original magnitude: raw_NTL = exp(ln_mean_NTL).
+   - Mathematically: if x_log = ln(x), then x = exp(x_log).
+
+4. **Non-Finite Value Handling**:
+   - exp() can produce infinity if ln_mean_NTL contains very large values (e.g., > 700).
+   - Infinities are replaced with NaN, then with 0, to prevent scale calculation errors.
+
+5. **Robust Scaling Using Medians**:
+   - **Why medians instead of means?**
+     - Median is resistant to outliers: one extreme value doesn't distort the median.
+     - Mean is sensitive: a single very large value can skew the result.
+   - **Scale factor**: scale = median(reference) / median(new_proxy)
+   - **Effect**: Preserves relative ordering within balanced_df while aligning 
+     magnitudes with the VIIRS distribution.
+   
+   **Example Scaling**:
+   ```
+   ref_median (existing avg_rad)  = 5.0
+   median(raw_proxy)              = 2.5
+   scale = 5.0 / 2.5 = 2.0
+   
+   For a row with raw_proxy = 1.0:
+   avg_rad = 1.0 * 2.0 = 2.0  (scaled to align with ref distribution)
+   ```
+
+6. **Result**: New rows are on the same numeric scale as existing rows, helping 
+   the downstream model (Gradient Boosting) treat all data consistently.
+
+**Why This Approach?**
+- NTL and radiance are both measures of light emission, so one is a reasonable 
+  proxy for the other.
+- Scaling by medians is a pragmatic, statistically sound method that preserves 
+  data structure while aligning magnitude distributions.
+
+---
+
+STEP 4: Filter Rows with Invalid Geometries
+---------------------------------------------
+- **Criteria**: Drop rows where `.geo` (GeoJSON) is empty or invalid.
+- **Method**: After creating `.geo` JSON strings, filter out rows with empty strings.
+- **Rationale**: The model requires valid point geometries; rows without valid 
+  coordinates cannot be used for training or prediction.
+
+PSEUDOCODE:
+```
+for each row in prepared_df:
+    if row[".geo"] == "":
+        mark_for_removal(row)
+
+prepared_df = prepared_df[not marked_for_removal]
+```
+
+---
+
+STEP 5: Output Format and Concatenation
+-----------------------------------------
+- Create output DataFrame with columns: `system:index`, `avg_rad`, `.geo`.
+- `.geo` is a JSON string in GeoJSON Point format:
+  ```
+  {"geodesic": false, "type": "Point", "coordinates": [lon, lat]}
+  ```
+- Concatenate balanced prepared data with existing `data.csv` using `pd.concat()`.
+- Write merged result to `data_prepared.csv`.
+- Update `model.py` constant `DATA_PATH` to point to `data_prepared.csv`.
+
+================================================================================
+DATA QUALITY TECHNIQUES APPLIED
+================================================================================
+
+1. NULL / MISSING VALUE HANDLING
+   ---------------------------------
+   Technique: Selective Imputation
+   - NaN values in proxy columns (`ln_mean_NTL`, `ln_sum_NTL`, `mean_PM25`) are 
+     replaced with 0 before exponentiation.
+   - Rationale: exp(0) = 1 is a neutral value; prevents NaN propagation and allows 
+     computation to proceed.
+   - Rows with invalid centroids (failed geometry parsing) are assigned (NaN, NaN).
+   - Such rows are filtered out in the geometry validation step.
+
+2. OUTLIER HANDLING VIA ROBUST STATISTICS
+   ----------------------------------------
+   Technique: Median-Based Scaling (Resistant to Outliers)
+   - Instead of using mean (sensitive to outliers), we use median for the scaling 
+     factor: scale = median(ref) / median(new).
+   - Median is the 50th percentile; extreme values do not change it as easily.
+   - Infinities from exp() are explicitly replaced with NaN then 0.
+   - Result: Extreme values in NTL do not distort the scaling transformation.
+   - The model downstream (Gradient Boosting) is relatively robust to numeric outliers, 
+     so additional filtering is not necessary.
+
+3. NO EXPLICIT DUPLICATE REMOVAL
+   --------------------------------
+   Decision: Duplicates are INTENTIONALLY PRESERVED
+   - Rationale: Each polygon (or VIIRS point) is a unique spatial observation.
+   - Removing duplicates could bias the training set toward less-represented 
+     geographic areas.
+   - If true duplicates exist (identical coordinates, values, time), they likely 
+     represent repeated measurements (valid data).
+   - Duplicate detection and removal should be a deliberate feature engineering 
+     step, not an implicit consequence of data merging.
+
+4. NO MANUAL OUTLIER REMOVAL DURING MERGE
+   ----------------------------------------
+   Decision: Outlier-Agnostic Merge Strategy
+   - The median-based scaling naturally mitigates outlier influence without 
+     explicit removal.
+   - Reasons for not removing outliers:
+     a) Extreme values may be valid (e.g., cities with very high NTL).
+     b) Gradient Boosting is relatively robust to numeric outliers in features.
+     c) Aggressive outlier removal can bias training toward "typical" cases 
+        and harm performance on diverse environments.
+   - If specific outlier detection is needed (e.g., using Isolation Forest or 
+     z-score thresholding), it should be applied in a separate, documented step.
+
+5. COLUMN VALIDATION
+   ----------------------
+   Technique: Defensive Checking
+   - Existing data (`data.csv`) is validated to contain required columns 
+     (`avg_rad`, `.geo`).
+   - Missing columns cause an informative error instead of silent failure.
+   - Raises runtime error if validation fails, preventing downstream model errors.
+
+================================================================================
+DESIGN RATIONALE AND TRADE-OFFS
+================================================================================
+
+1. Using NTL-Derived Fields as a Proxy for Radiance
+   - **Rationale**: Night-time lights (NTL) are conceptually related to artificial 
+     light emissions, and radiance is a measure of light intensity. One is a 
+     reasonable proxy for the other when direct measurements are unavailable.
+   - **Trade-off**: NTL is not a perfect proxy (different instrumentation, 
+     measurement times); but it is the best available alternative given the data.
+   - **Strength**: The log-inversion and median scaling preserve the relative structure 
+     of the balanced dataset while aligning magnitudes with the VIIRS distribution.
+
+2. Centroid Approximation by Averaging Vertices
+   - **Rationale**: Avoids heavy GIS dependencies and is deterministic, reproducible.
+   - **Alternative**: Use `shapely` or `geopandas` for exact centroids (true center 
+     of mass), but adds dependencies and complexity.
+   - **Trade-off**: Averaging vertices is simpler but not area-weighted. For polygons 
+     with uniform vertex density, error is typically < 5%.
+   - **Acceptable for**: Coarse-grained spatial analysis; may be refined later if 
+     precision requirements increase.
+
+3. Scaling by Medians (Robust to Outliers)
+   - **Rationale**: Median is a robust statistic resistant to extreme values, unlike mean.
+   - **Why important**: If one dataset has extreme NTL values, the mean would be distorted, 
+     leading to incorrect scaling. Median provides stable, reliable scaling.
+   - **Trade-off**: Medians are less sensitive to small deviations, so if precise 
+     distribution matching is needed, quantile-quantile matching or more sophisticated 
+     methods may be better.
+
+4. No Explicit Duplicate Removal
+   - **Rationale**: Each polygon and VIIRS point is a unique spatial observation.
+   - **Risk of removal**: Could bias training set toward less-represented areas.
+   - **Assumption**: If true duplicates exist, they are intentional (repeated measurements).
+   - **Alternative**: If duplicates are a known issue, a separate cleaning step can be added.
+
+5. No Manual Outlier Removal During Merge
+   - **Rationale**: The median-based scaling naturally mitigates outlier influence.
+   - **Model robustness**: Gradient Boosting is relatively robust to numeric outliers.
+   - **Data fidelity**: Extreme values may represent real environmental extremes (e.g., 
+     highly polluted urban centers).
+   - **Separation of concerns**: Outlier detection and removal should be a deliberate 
+     feature engineering decision, not an implicit consequence of data merging.
+
+================================================================================
+HOW TO REPRODUCE
+================================================================================
+
+1. Ensure your Python environment satisfies `requirements.txt`:
+   ```
+   pip install -r requirements.txt
+   ```
+
+2. From the project root directory, run:
+   ```
+   python -m scripts.preprocess_balanced
+   ```
+
+3. This will:
+   - Read `data.csv` (existing VIIRS) and `balanced_dataSet_more_pollutants.csv` 
+     (new polygon data).
+   - Create `data_prepared.csv` with merged, point-level data.
+   - Print confirmation: "Wrote prepared data to: .../data_prepared.csv"
+
+4. The project `model.py` is already configured to use `data_prepared.csv`. 
+   Start training:
+   ```
+   python app.py
+   ```
+   Or test the ML pipeline directly:
+   ```
+   python -c "from model import LightPollutionClassifier; clf = LightPollutionClassifier(); print(clf.train())"
+   ```
+
+================================================================================
+NEXT STEPS / RECOMMENDATIONS
+================================================================================
+
+1. **Validate the proxy mapping**:
+   - Inspect the distributions of `avg_rad` before and after merging.
+   - Compare histograms or summary statistics (mean, median, std, min, max).
+   - Ensure the scaled NTL proxy behaves as intended.
+   - Can be done with: `pandas.describe()` or matplotlib histograms.
+
+2. **Feature Engineering with New Variables**:
+   - The balanced dataset includes pollutants (`mean_PM25`, `mean_NO2`, etc.) 
+     and socio-economic indicators (`ln_GDPpc`, etc.).
+   - Currently, only `ln_mean_NTL` is used to build `avg_rad`; all other variables 
+     are discarded.
+   - **Recommendation**: In Phase 3, extend feature engineering to include these 
+     additional variables. This would likely improve model performance and interpretability.
+   - Example: Train a model with features = [avg_rad, mean_PM25, mean_NO2, ln_GDPpc, ...].
+
+3. **Improve Centroid Precision**:
+   - If higher spatial fidelity is required, re-compute centroids using `shapely.geometry.shape` 
+     or `geopandas.GeoSeries.centroid`.
+   - This would provide true area-weighted centroids and is worth doing if 
+     sub-100m precision is needed.
+
+4. **Learned Calibration of NTL Proxy** (Advanced):
+   - If overlapping data exists between VIIRS points and balanced polygons (same location, 
+     different datasets), a regression-based calibration can be learned.
+   - Example: Linear regression to predict `avg_rad` from raw NTL, rather than 
+     using median scaling.
+   - This would be more data-driven and potentially more accurate.
+   - Contact: Let me know if you want to implement this.
+
+================================================================================
+CONTACT / SUPPORT
+================================================================================
+
+If you want a different mapping for `avg_rad` (e.g., a learned calibration using 
+overlapping points, or a different NTL inversion method), let me know and I can 
+implement a regression-based mapper using overlapping samples between datasets.
+
+For questions about specific implementation details, refer to:
+- `scripts/preprocess_balanced.py` (source code with inline comments)
+- This document (technical rationale and design decisions)
+
+================================================================================

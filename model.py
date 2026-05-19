@@ -53,7 +53,7 @@ GEO_BOUNDS = {
     "lon_min": -75.0, "lon_max": -72.9
 }
 
-DATA_PATH = os.path.join(os.path.dirname(__file__), "data.csv")
+DATA_PATH = os.path.join(os.path.dirname(__file__), "data_prepared.csv")
 
 
 # ─────────────────────────────────────────
