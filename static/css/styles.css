@@ -568,3 +568,176 @@ footer span { color: var(--accent); }
   box-shadow: 0 8px 30px rgba(0,0,0,.6) !important;
 }
 .leaflet-popup-tip { background: var(--surface) !important; }
+
+/* ══════════════════════════════════════
+   NAVBAR COMPONENT  ·  navbar.html
+   ══════════════════════════════════════ */
+
+/* ── Contenedor principal ── */
+.ls-navbar {
+  background: rgba(5, 8, 16, .94) !important;
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: .55rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  min-height: 56px;
+}
+
+/* ── Logo ── */
+.ls-brand {
+  font-family: var(--font-head);
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--accent) !important;
+  letter-spacing: -.02em;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.ls-brand-dot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  animation: pulse-dot 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+/* ── Lista de fases (centro) ── */
+.ls-nav-phases {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Botón de fase ── */
+.ls-phase-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: .38rem .9rem;
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-dim);
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.4;
+  letter-spacing: .04em;
+  transition:
+    border-color .22s,
+    background   .22s,
+    color        .22s,
+    box-shadow   .22s,
+    transform    .15s;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.ls-phase-btn:hover,
+.ls-phase-btn.active {
+  border-color: var(--accent);
+  background: rgba(0, 212, 255, .08);
+  color: var(--accent);
+  box-shadow: 0 0 14px rgba(0, 212, 255, .18);
+  transform: translateY(-1px);
+}
+
+/* Número de fase */
+.ls-phase-num {
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  border: 1px solid currentColor;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: background .22s;
+}
+
+.ls-phase-btn:hover .ls-phase-num,
+.ls-phase-btn.active .ls-phase-num {
+  background: rgba(0, 212, 255, .15);
+}
+
+.ls-phase-label {
+  text-align: left;
+  font-size: 9.5px;
+  line-height: 1.35;
+}
+
+/* ── Badges derecha ── */
+.ls-nav-right {
+  flex-shrink: 0;
+}
+
+.ls-badge-model {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 3px 11px;
+  border-radius: 20px;
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+
+.ls-nav-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .08em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.ls-nav-author {
+  color: var(--accent);
+}
+
+/* ── Toggler mobile ── */
+.ls-toggler {
+  background: transparent;
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  padding: 5px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.ls-toggler span {
+  display: block;
+  width: 18px; height: 2px;
+  background: var(--text-dim);
+  border-radius: 2px;
+  transition: background .2s;
+}
+
+.ls-toggler:hover span { background: var(--accent); }
+
+/* ── Mobile collapse ── */
+@media (max-width: 991px) {
+  .ls-nav-phases {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: .8rem 0;
+    gap: 6px !important;
+    width: 100%;
+  }
+
+  .ls-phase-btn {
+    width: 100%;
+  }
+}

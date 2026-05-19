@@ -63,7 +63,7 @@ function initMap() {
     const lon = e.latlng.lng.toFixed(6);
     document.getElementById('inp-lat').value = lat;
     document.getElementById('inp-lon').value = lon;
-    showToast(`Coordenadas capturadas: ${lat}, ${lon}`);
+    showToast(`📍 Coordenadas capturadas: ${lat}, ${lon}`);
   });
 }
 
@@ -294,7 +294,46 @@ function showToast(msg) {
   toast._t = setTimeout(() => { toast.style.opacity = '0'; }, 2800);
 }
 
-// ── INIT ──
+// ── NAVBAR · ACTIVE STATE POR SCROLL ──
+(function () {
+  const phases = [
+    { btn: '[data-fase="1"]', section: '#fase-datos'     },
+    { btn: '[data-fase="2"]', section: '#fase-modelo'    },
+    { btn: '[data-fase="3"]', section: '#fase-resultado' },
+  ];
+
+  function updateActive() {
+    const scrollY = window.scrollY + 80;
+    let current = 0;
+    phases.forEach((p, i) => {
+      const el = document.querySelector(p.section);
+      if (el && el.getBoundingClientRect().top + window.scrollY <= scrollY) {
+        current = i;
+      }
+    });
+    phases.forEach((p, i) => {
+      const btn = document.querySelector(p.btn);
+      if (btn) btn.classList.toggle('active', i === current);
+    });
+  }
+
+  window.addEventListener('scroll', updateActive, { passive: true });
+  document.addEventListener('DOMContentLoaded', updateActive);
+
+  // Smooth scroll con offset del navbar fijo
+  document.querySelectorAll('.ls-phase-btn').forEach(btn => {
+    btn.addEventListener('click', function (e) {
+      const href = this.getAttribute('href');
+      const target = document.querySelector(href);
+      if (target) {
+        e.preventDefault();
+        const offset = 70;
+        const top = target.getBoundingClientRect().top + window.scrollY - offset;
+        window.scrollTo({ top, behavior: 'smooth' });
+      }
+    });
+  });
+})();
 document.addEventListener('DOMContentLoaded', function() {
   // Inicializar mapa con pequeño delay para layout
   setTimeout(initMap, 200);

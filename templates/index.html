@@ -15,19 +15,7 @@
 <body>
 
 <!-- ════════════ NAVBAR ════════════ -->
-<nav class="navbar navbar-expand-lg">
-  <div class="container-fluid px-4">
-    <a class="navbar-brand" href="#">
-      <div class="brand-dot"></div>
-      LightScan
-    </a>
-    <div class="d-flex align-items-center gap-3">
-      <span class="badge-model">GradientBoosting · {{ stats.accuracy }}% acc</span>
-      <span class="nav-link d-none d-md-block">VIIRS / SUOMI-NPP</span>
-      <span class="nav-link d-none d-md-block text-accent">JoanMoreno</span>
-    </div>
-  </div>
-</nav>
+{% include 'navbar.html' %}
 
 <!-- ════════════ HERO ════════════ -->
 <section class="hero">
