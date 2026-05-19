@@ -741,3 +741,162 @@ footer span { color: var(--accent); }
     width: 100%;
   }
 }
+
+/* ===================================== */
+/* BUSINESS UNDERSTANDING SECTION */
+/* ===================================== */
+
+.ls-business-section{
+    width: 100%;
+    padding: 70px 5%;
+    position: relative;
+    z-index: 2;
+}
+
+.ls-business-header{
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.ls-business-badge{
+    display: inline-block;
+    padding: 10px 22px;
+    border: 1px solid rgba(0,255,255,0.3);
+    border-radius: 30px;
+    color: #00d9ff;
+    font-size: 13px;
+    letter-spacing: 2px;
+    margin-bottom: 25px;
+    background: rgba(0,217,255,0.08);
+    backdrop-filter: blur(10px);
+}
+
+.ls-business-title{
+    font-size: 55px;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 15px;
+    line-height: 1.1;
+}
+
+.ls-business-title span{
+    color: #00d9ff;
+}
+
+.ls-business-subtitle{
+    color: #7c8aa5;
+    font-size: 15px;
+    letter-spacing: 1px;
+    text-align: center;
+}
+
+.ls-business-content{
+    width: 100%;
+    max-width: 1400px;
+    margin: auto;
+    margin-bottom: 50px;
+}
+
+.ls-business-text{
+    color: #d4d9e3;
+    font-size: 20px;
+    line-height: 2;
+    margin-bottom: 25px;
+    text-align: justify;
+}
+ p{
+color: #d4d9e3;
+    font-size: 20px;
+    line-height: 2;
+    margin-bottom: 20px;
+    text-align: justify;
+ }
+
+/* ===================================== */
+/* GRID */
+/* ===================================== */
+
+.ls-business-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px,1fr));
+    gap: 25px;
+    margin-top: 40px;
+}
+
+.ls-business-card{
+    background: linear-gradient(
+        180deg,
+        rgba(7,17,40,0.95),
+        rgba(10,20,50,0.95)
+    );
+
+    border: 1px solid rgba(0,217,255,0.15);
+    border-radius: 20px;
+
+    padding: 30px;
+
+    transition: 0.4s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.ls-business-card::before{
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 3px;
+    top: 0;
+    left: 0;
+
+    background: linear-gradient(
+        90deg,
+        #00d9ff,
+        transparent
+    );
+}
+
+.ls-business-card:hover{
+    transform: translateY(-8px);
+    border-color: rgba(0,217,255,0.4);
+
+    box-shadow:
+        0 0 25px rgba(0,217,255,0.08);
+}
+
+.ls-card-icon{
+    font-size: 35px;
+    margin-bottom: 20px;
+}
+
+.ls-card-title{
+    color: #00d9ff;
+    font-size: 20px;
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+.ls-card-text{
+    color: #cfd8ea;
+    line-height: 1.8;
+    font-size: 14px;
+}
+
+/* ===================================== */
+/* RESPONSIVE */
+/* ===================================== */
+
+@media(max-width: 768px){
+
+    .ls-business-title{
+        font-size: 38px;
+    }
+
+    .ls-business-text{
+        font-size: 14px;
+    }
+
+    .ls-business-grid{
+        grid-template-columns: 1fr;
+    }
+
+}

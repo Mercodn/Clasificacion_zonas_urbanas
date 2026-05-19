@@ -1,7 +1,7 @@
 # ══════════════════════════════════════════════════════════════
 #  model.py  ·  Light Pollution Classifier
 #  Módulo de Machine Learning — separado de la lógica Flask
-#  JoanMoreno y Francisco· Cundinamarca VIIRS / SUOMI-NPP
+#  JoanMoreno · Cundinamarca VIIRS / SUOMI-NPP
 # ══════════════════════════════════════════════════════════════
 
 import os
