@@ -1,0 +1,430 @@
+================================================================================
+PHASE 1: BUSINESS AND DATA UNDERSTANDING
+CRISP-ML(Q) Methodology
+================================================================================
+
+1. BUSINESS OBJECTIVES
+================================================================================
+
+1.1 Problem Statement
+---------------------
+Light pollution has become an increasing environmental problem in urban and 
+semi-urban areas due to the excessive and uncontrolled use of artificial 
+lighting during nighttime. High levels of light pollution can negatively affect:
+    • Ecosystems (disruption of nocturnal wildlife behavior)
+    • Human health (circadian rhythm disruption, sleep disorders)
+    • Energy consumption (inefficient lighting practices)
+    • Visibility of the night sky (astronomical observation impact)
+
+In Cundinamarca, the growth of urban areas and nighttime infrastructure has 
+generated significant variations in light intensity between municipalities and 
+populated sectors. Identifying and analyzing these areas manually is difficult 
+because of the large amount of geographic and environmental information involved.
+
+1.2 Project Goal
+----------------
+Analyze and classify nighttime light pollution levels in Cundinamarca using 
+open satellite data in order to:
+    • Identify areas with low, medium, and high levels of artificial illumination
+    • Support environmental analysis and territorial studies
+    • Generate organized and interpretable information for stakeholders
+    • Enable data-driven decision-making for urban planning and environmental management
+
+1.3 Project Objectives (SMART)
+-------------------------------
+    a) Develop a classification model that categorizes geographic zones in 
+       Cundinamarca into light pollution levels (Low/Medium/High) with ≥85% accuracy
+    
+    b) Process and prepare VIIRS nighttime lights data to create a usable dataset 
+       containing ≥8000 point observations with radiance and location information
+    
+    c) Identify geographic patterns and hotspots of light pollution across 
+       municipalities and populated sectors in Cundinamarca
+    
+    d) Create a web-based visualization interface enabling stakeholders to explore 
+       and interpret light pollution patterns interactively
+
+1.4 Stakeholders and Users
+---------------------------
+    • Primary: Environmental agencies and city planners in Cundinamarca
+    • Secondary: Academic researchers studying urban sustainability
+    • Tertiary: Policymakers developing light pollution regulations
+    • Technical: Data science and GIS teams conducting territorial analysis
+
+1.5 Expected Business Value
+----------------------------
+    • Data-driven insights for urban development planning
+    • Evidence base for environmental policy creation
+    • Cost reduction through optimization of public lighting infrastructure
+    • Foundation for future environmental monitoring systems
+    • Academic contribution to environmental science in the region
+
+================================================================================
+2. KEY RESEARCH QUESTIONS
+================================================================================
+
+2.1 Strategic Questions
+-----------------------
+    1. Which municipalities/sectors in Cundinamarca present the highest levels 
+       of nighttime light pollution?
+    
+    2. What is the geographic distribution pattern of light pollution across 
+       the region (clustered, dispersed, concentric)?
+    
+    3. How do light pollution levels correlate with urban development, 
+       population density, and economic activity?
+    
+    4. Are there distinct transition zones between low, medium, and high 
+       pollution areas?
+
+2.2 Technical/Analytical Questions
+----------------------------------
+    5. Can satellite radiance values from VIIRS be reliably used to classify 
+       light pollution levels?
+    
+    6. What radiance thresholds best distinguish between pollution levels 
+       (quantitative boundaries)?
+    
+    7. What is the temporal stability of light pollution patterns 
+       (seasonal/annual variations)?
+    
+    8. How effectively can machine learning models classify zones based on 
+       available features?
+
+2.3 Data Quality Questions
+---------------------------
+    9. What is the completeness and spatial coverage of VIIRS data in 
+       Cundinamarca (gaps, resolution)?
+    
+    10. How do variations in atmospheric conditions, cloud cover, and seasonal 
+        factors affect radiance measurements?
+    
+    11. Is there sufficient data variability to train a robust classification model?
+
+================================================================================
+3. DATA UNDERSTANDING AND EVALUATION
+================================================================================
+
+3.1 Data Sources
+----------------
+
+Primary Data Source: VIIRS Nighttime Lights
+    • Provider: NOAA (National Oceanic and Atmospheric Administration)
+    • Satellite Program: VIIRS DNB (Day/Night Band) on Suomi NPP and NOAA-20
+    • Product: Monthly composites of nighttime radiance
+    • Availability: Public and free to access
+    • URL: https://earthdata.nasa.gov/ or Google Earth Engine
+
+Data Characteristics:
+    • Geographic Coverage: Global; subset extracted for Cundinamarca region
+    • Spatial Resolution: ~750m per pixel at nadir
+    • Temporal Resolution: Monthly and annual composites available
+    • Time Period Available: 2012 onwards (continuous)
+    • Measurement Unit: Radiance (nanoWatts/cm²/sr)
+    • Format: GeoTIFF, NetCDF, or point shapefile
+
+Metadata included:
+    • Longitude and Latitude (geographic coordinates)
+    • Radiance intensity (avg_rad: average radiance value per area)
+    • Quality flags (indicating data reliability)
+    • GeoJSON format for spatial representation
+
+3.2 Supplementary Data Sources
+-------------------------------
+
+To enrich the analysis, the project incorporates:
+
+    a) Balanced Polygon Dataset (balanced_dataSet_more_pollutants.csv)
+       - Source: External environmental study
+       - Contains: Polygon geometries representing administrative/geographic areas
+       - Variables: 
+         * ln_mean_NTL, ln_sum_NTL (logarithmic NTL statistics)
+         * mean_PM25 (particulate matter - air pollution proxy)
+         * mean_NO2, NO2_std (nitrogen dioxide measurements)
+         * ln_GDPpc (logged GDP per capita - economic indicator)
+         * Other socio-economic and environmental indicators
+       - Purpose: Validate NTL-to-radiance proxy and enrich feature set
+       - Coverage: Geographic zones in Cundinamarca
+
+3.3 Data Evaluation
+--------------------
+
+Data Quality Assessment:
+    • Reliability: VIIRS is operated by NOAA, a trusted scientific organization
+    • Relevance: Directly measures light emission, core to light pollution analysis
+    • Completeness: Provides coverage across Cundinamarca with acceptable spatial resolution
+    • Consistency: Monthly composites ensure standardized, comparable measurements
+    • Temporal Coverage: Multiple years allow trend analysis and pattern validation
+
+Suitability for Project:
+    ✓ Contains measurable radiance values suitable for quantitative classification
+    ✓ Sufficient spatial resolution to distinguish urban vs. rural areas
+    ✓ Sufficient data volume (8360+ points) to support ML model training
+    ✓ Open and freely accessible, ensuring reproducibility
+    ✓ Well-documented and widely used in environmental research
+
+Data Constraints & Considerations:
+    • Spatial Resolution Limitation: 750m pixels may not capture fine-grained 
+      variations within cities
+    • Temporal Granularity: Monthly composites may obscure short-term variations
+    • Atmospheric Effects: Cloud cover and aerosols can affect radiance measurements
+    • Bloom Effect: Bright urban lights can bleed into surrounding pixels
+    • No Direct Validation Data: Ground truth light pollution measurements are 
+      limited for direct accuracy validation
+
+3.4 Data Dictionary
+--------------------
+
+Available variables in prepared dataset:
+
+| Variable      | Type    | Unit              | Description                                |
+|---------------|---------|-------------------|--------------------------------------------|
+| system:index  | String  | ID                | Unique identifier for point/observation    |
+| avg_rad       | Float   | nanoW/cm²/sr      | Average nighttime radiance value           |
+| .geo          | JSON    | GeoJSON Point     | Geographic coordinates [longitude, latitude]|
+| lon           | Float   | Decimal degrees   | Longitude coordinate                       |
+| lat           | Float   | Decimal degrees   | Latitude coordinate                        |
+| ln_mean_NTL   | Float   | Natural log scale | Logarithm of mean nighttime lights         |
+| ln_sum_NTL    | Float   | Natural log scale | Logarithm of sum of nighttime lights       |
+| mean_PM25     | Float   | µg/m³             | Air quality: particulate matter (fallback) |
+| mean_NO2      | Float   | ppb               | Air quality: nitrogen dioxide              |
+| ln_GDPpc      | Float   | Natural log scale | Logged GDP per capita (socio-economic)     |
+
+================================================================================
+4. FEASIBILITY ANALYSIS
+================================================================================
+
+4.1 Technical Feasibility
+--------------------------
+
+Infrastructure Requirements:
+    ✓ Data Processing: Standard Python environment (pandas, scikit-learn, numpy)
+    ✓ Storage: ~500 MB for processed datasets (modest requirements)
+    ✓ Computation: Gradient Boosting training completes in minutes on standard CPU
+    ✓ Deployment: Flask web framework sufficient for interactive dashboard
+    ✓ No specialized hardware required (no GPU, no large-scale distributed computing)
+
+Data Processing Capability:
+    ✓ 8360+ data points sufficient for supervised ML classification
+    ✓ Multiple features enable multivariate analysis
+    ✓ Radiance values provide direct, quantifiable basis for classification
+    ✓ Proven methodologies exist for nighttime lights analysis in literature
+
+Model Development Feasibility:
+    ✓ Classification task (Low/Medium/High pollution) is well-defined
+    ✓ Supervised learning applicable (Gradient Boosting selected)
+    ✓ Baseline accuracy expectations: >80% feasible based on problem structure
+    ✓ Cross-validation and performance metrics can be computed
+
+4.2 Organizational Feasibility
+-------------------------------
+
+Academic/Research Context:
+    ✓ Project aligns with environmental science research priorities
+    ✓ Uses publicly available, open-source data (no licensing barriers)
+    ✓ Reproducible methodology (documented, shareable code)
+    ✓ Contributes to knowledge on urban sustainability in Colombia
+
+Stakeholder Buy-in:
+    ✓ Environmental agencies have interest in light pollution monitoring
+    ✓ City planners need data for evidence-based policy
+    ✓ Results can inform municipal environmental ordinances
+    ✓ Public dashboard increases transparency and engagement
+
+Resource Requirements:
+    ✓ Development time: 3-4 weeks for full implementation (realistic scope)
+    ✓ Technical team: 1-2 data engineers/scientists (achievable with current resources)
+    ✓ Domain expertise: Light pollution science is accessible through literature
+    ✓ No interdepartmental dependencies (standalone project)
+
+4.3 Legal and Ethical Feasibility
+----------------------------------
+
+Data Privacy:
+    ✓ Satellite data is aggregated and anonymized (no personal identifiers)
+    ✓ No violation of privacy regulations
+    ✓ VIIRS data is publicly released by NOAA (no access restrictions)
+
+Ethical Considerations:
+    ✓ Project supports environmental protection (positive social impact)
+    ✓ Open publication of results supports transparency
+    ✓ No potential for harmful misuse of light pollution insights
+    ✓ Results support sustainable development goals (SDG 11, 13)
+
+================================================================================
+5. RISKS AND LIMITATIONS
+================================================================================
+
+5.1 Data Quality Risks
+----------------------
+
+Risk: Variations in Satellite Measurements Over Time
+    Probability: High
+    Impact: Model training accuracy affected
+    Mitigation: Use multiple years of data, apply temporal normalization,
+                validate model stability across time periods
+
+Risk: Atmospheric Interference (clouds, aerosols)
+    Probability: High (seasonal)
+    Impact: Biased radiance measurements
+    Mitigation: Use quality flags to filter low-quality measurements,
+                aggregate seasonal variations, test model robustness
+
+Risk: Data Gaps in Coverage
+    Probability: Medium
+    Impact: Incomplete geographic representation
+    Mitigation: Document coverage gaps, interpolate where appropriate,
+                acknowledge limitations in final analysis
+
+5.2 Model and Analysis Risks
+-----------------------------
+
+Risk: Insufficient Data Variability
+    Probability: Low
+    Impact: Model fails to learn meaningful patterns
+    Mitigation: Preliminary exploratory analysis (done); 8360+ points with 
+                wide radiance range confirm variability exists
+
+Risk: Class Imbalance (unequal distribution of Low/Medium/High zones)
+    Probability: Medium
+    Impact: Model biased toward majority class
+    Mitigation: Use stratified cross-validation, class weights in training,
+                SMOTE or undersampling if needed
+
+Risk: Overfitting to Local Patterns
+    Probability: Medium
+    Impact: Poor generalization to unseen areas
+    Mitigation: Regularization in model, cross-validation, hold-out test set,
+                spatial validation (geographic partitioning)
+
+5.3 Technical Limitations
+--------------------------
+
+Spatial Resolution Limitation:
+    • VIIRS 750m pixels may not capture sub-neighborhood variations
+    • Urban features smaller than pixel size are smoothed
+    • Mitigation: Document resolution in results; acknowledge limited detail
+
+Temporal Granularity:
+    • Monthly composites hide day-to-day or week-to-week variation
+    • Seasonal effects may confound patterns
+    • Mitigation: Use annual composites; analyze seasonal patterns separately
+
+Validation Challenge:
+    • No direct on-site light pollution measurements for validation
+    • Ground truth data would require expensive light meter surveys
+    • Mitigation: Use domain expertise and literature comparison for plausibility
+
+5.4 Project Scope Limitations
+-----------------------------
+
+Geographic Scope:
+    • Project focuses only on Cundinamarca; results not generalizable to other regions
+    • Urban-rural patterns may differ in other Colombian regions
+
+Temporal Scope:
+    • Analysis based on data available; historical trends limited by VIIRS start date (2012)
+    • Future projections not within scope
+
+Feature Scope:
+    • Analysis focuses on radiance; does not account for all light pollution factors
+    • Spectral composition, light spectrum, and chromatic effects not measured
+    • Human perception and ecological impact not directly quantified
+
+Model Scope:
+    • Three-class classification (Low/Medium/High) is simplification
+    • Continuous pollution index might be more informative
+    • Time series modeling not in scope for Phase 1
+
+5.5 Mitigation Strategy Summary
+--------------------------------
+
+Critical Risks Addressed:
+    1. Data gaps → Quality filtering + documentation
+    2. Model performance → Rigorous cross-validation + ensemble approach
+    3. Validation difficulty → Domain literature comparison + stakeholder review
+    4. Overfitting → Regularization + geographic cross-validation
+
+Residual Risks Accepted:
+    • Spatial resolution limitation (acceptable for regional analysis)
+    • Temporal granularity (standard for public satellite data)
+    • Three-class simplification (pragmatic balance between detail and usability)
+
+================================================================================
+6. SUCCESS CRITERIA AND KEY PERFORMANCE INDICATORS (KPIs)
+================================================================================
+
+6.1 Model Performance Metrics
+-----------------------------
+
+Primary KPIs:
+    ✓ Model Accuracy: ≥85% on hold-out test set
+    ✓ F1-Score: ≥0.83 (balanced precision and recall)
+    ✓ Class-wise Recall: ≥80% for each class (Low, Medium, High)
+    ✓ Cross-validation Score: Consistent ±3% across folds (stability)
+
+6.2 Data Quality Metrics
+------------------------
+
+    ✓ Data Completeness: ≥95% non-null values in key features
+    ✓ Geometric Validity: ≥98% of records have valid geographic coordinates
+    ✓ Outlier Handling: Documented and justified removal/retention decisions
+    ✓ Feature Variance: Multivariate variance sufficient (validated in EDA)
+
+6.3 Deliverable Quality Metrics
+--------------------------------
+
+    ✓ Code Documentation: All functions documented with docstrings
+    ✓ Reproducibility: Code runs end-to-end without manual intervention
+    ✓ Visualization Quality: Stakeholder-friendly maps and charts generated
+    ✓ Report Clarity: Technical documentation accessible to non-specialists
+
+6.4 Business Impact Metrics
+----------------------------
+
+    ✓ Stakeholder Feedback: ≥4/5 satisfaction with results and usability
+    ✓ Geographic Coverage: ≥90% of Cundinamarca municipalities represented
+    ✓ Actionability: ≥5 specific, evidence-based recommendations for policy
+    ✓ Adoption: Model integrated into web interface for public access
+
+================================================================================
+7. PROJECT ASSUMPTIONS
+================================================================================
+
+7.1 Data Assumptions
+--------------------
+
+    • VIIRS measurements are accurate and representative of true nighttime light
+    • Monthly radiance composites are suitable for classification (no resolution loss)
+    • Radiance values correlate meaningfully with environmental light pollution
+    • Balanced dataset NTL values align with VIIRS radiance (scaling is valid)
+    • Geographic coordinates are accurate to ±500m
+
+7.2 Model Assumptions
+---------------------
+
+    • Light pollution can be meaningfully classified into three discrete categories
+    • Available features contain sufficient predictive power for classification
+    • Class boundaries are learnable from the training data
+    • Model trained on Cundinamarca data generalizes to unseen areas in the region
+
+7.3 Business Assumptions
+------------------------
+
+    • Stakeholders will use model outputs for evidence-based decision-making
+    • Light pollution classification aligns with policy and planning needs
+    • Public web interface will increase engagement and awareness
+    • Project results will inform future environmental monitoring systems
+
+================================================================================
+8. NEXT STEPS / TRANSITION TO PHASE 2
+================================================================================
+
+Phase 2 (Data Preparation) will:
+    ✓ Formalize pollution level thresholds (radiance boundaries for Low/Med/High)
+    ✓ Implement data cleaning and validation pipeline
+    ✓ Create balanced dataset by merging VIIRS and supplementary sources
+    ✓ Generate training/validation/test partitions
+    ✓ Document all preprocessing decisions and transformations
+
+================================================================================
