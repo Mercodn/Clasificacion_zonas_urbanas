@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,42 +11,42 @@
   {% include 'navbar.html' %}
   <main class="container mt-5">
     <div class="mb-4">
-      <span class="badge bg-info text-dark mb-2">CRISP-ML · Phase 2 of 3</span>
+      <span class="badge bg-info text-dark mb-2">CRISP-ML · Fase 2</span>
       <h1>Data Engineering</h1>
-      <p class="lead text-muted">Clean, transform, and prepare the dataset for modeling with engineered features.</p>
+      <p class="lead text-muted">Preparar datos y entrenar el modelo con características derivadas que mejoran la clasificación.</p>
     </div>
     <div class="row gy-4">
       <div class="col-lg-5">
         <div class="card bg-dark bg-gradient border-secondary text-white h-100">
           <div class="card-body">
-            <h2 class="h5">Data preparation</h2>
+            <h2 class="h5">Pipeline de preparación</h2>
             <ul class="text-muted">
-              <li>Parse GeoJSON coordinates into lat/lon values.</li>
-              <li>Validate and normalize average radiance data.</li>
-              <li>Create features like log_rad, dist_bogota, and rad_sq.</li>
+              <li>Convertir GeoJSON a latitud/longitud.</li>
+              <li>Normalizar radiancia y eliminar valores no válidos.</li>
+              <li>Crear features: log_rad, dist_bogota y rad_sq.</li>
             </ul>
           </div>
         </div>
         <div class="card bg-dark bg-gradient border-secondary text-white mt-4">
           <div class="card-body">
-            <h2 class="h5">Training pipeline</h2>
-            <ol class="text-muted small mb-0">
-              <li>Load and clean dataset</li>
-              <li>Label zones using radiance thresholds</li>
-              <li>Build feature matrix and scale values</li>
-              <li>Train Gradient Boosting classifier</li>
-            </ol>
+            <h2 class="h5">Configuración del modelo</h2>
+            <ul class="text-muted">
+              <li>Algoritmo: Gradient Boosting Classifier.</li>
+              <li>Estimadores: 200, learning_rate: 0.1, max_depth: 5.</li>
+              <li>Validación: split 80/20 estratificado.</li>
+            </ul>
           </div>
         </div>
       </div>
       <div class="col-lg-7">
         <div class="card bg-black border-secondary text-white">
           <div class="card-body">
-            <h2 class="h5">Feature importance</h2>
+            <h2 class="h5">Importancia de variables</h2>
+            <p class="text-muted">El modelo usa seis variables con distintos aportes a la clasificación.</p>
             {% for feat in feature_importance %}
             <div class="mb-3">
               <div class="d-flex justify-content-between"><span>{{ feat.name }}</span><strong>{{ feat.pct }}%</strong></div>
-              <div class="progress" style="height:8px;"><div class="progress-bar bg-info" role="progressbar" style="width: {{ feat.pct }}%;"></div></div>
+              <div class="progress" style="height:8px;"><div class="progress-bar bg-info" role="progressbar" style="width: {{ feat.pct }}%;" aria-valuenow="{{ feat.pct }}" aria-valuemin="0" aria-valuemax="100"></div></div>
               <div class="text-muted small mt-1">{{ feat.desc }}</div>
             </div>
             {% endfor %}
@@ -55,8 +55,8 @@
       </div>
     </div>
     <div class="d-flex justify-content-between align-items-center mt-5">
-      <a href="{{ url_for('business') }}" class="btn btn-outline-info">← Phase 1</a>
-      <a href="{{ url_for('fase3') }}" class="btn btn-info text-dark">Phase 3 · Evaluation →</a>
+      <a href="{{ url_for('data_understanding') }}" class="btn btn-outline-info">← Phase 1</a>
+      <a href="{{ url_for('evaluation') }}" class="btn btn-info text-dark">Phase 3 · Evaluation →</a>
     </div>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

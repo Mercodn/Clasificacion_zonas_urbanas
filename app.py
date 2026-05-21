@@ -13,6 +13,8 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
+from sklearn.metrics import roc_curve, auc
+from sklearn.preprocessing import label_binarize
 
 from flask import Flask, render_template, request, jsonify
 
@@ -107,6 +109,75 @@ def _render_heatmap(df, highlight_point: dict = None) -> str:
     plt.close(fig)
     buf.seek(0)
     return base64.b64encode(buf.read()).decode("utf-8")
+
+
+def _render_roc_curve(classifier):
+    """Genera un ROC plot multi-clase en base64."""
+    if not classifier._trained:
+        return ""
+
+    y_test = classifier.y_test
+    y_proba = classifier.y_proba_test
+    n_classes = y_proba.shape[1]
+    y_bin = label_binarize(y_test, classes=np.arange(n_classes))
+
+    fig, ax = plt.subplots(figsize=(9, 7), facecolor="black")
+    ax.set_facecolor("black")
+
+    colors = ["#38bef8", "#22c55e", "#ffb300", "#ff1100", "#00cfff", "#0040ff"]
+    for i in range(n_classes):
+        fpr, tpr, _ = roc_curve(y_bin[:, i], y_proba[:, i])
+        roc_auc = auc(fpr, tpr)
+        ax.plot(
+            fpr, tpr,
+            label=f"{ZONE_NAMES[i]} (AUC {roc_auc:.2f})",
+            color=colors[i % len(colors)], linewidth=2
+        )
+
+    ax.plot([0, 1], [0, 1], color="#888888", linestyle="--", linewidth=1.5)
+    ax.set_xlabel("False Positive Rate", color="#cccccc")
+    ax.set_ylabel("True Positive Rate", color="#cccccc")
+    ax.set_title("Curva ROC multi-clase — mejor modelo", color="white", fontsize=11, pad=12)
+    ax.tick_params(colors="#999999")
+    ax.legend(loc="lower right", fontsize=8, facecolor="#111111", framealpha=0.9, edgecolor="#444444")
+
+    plt.tight_layout()
+    buf = io.BytesIO()
+    plt.savefig(buf, format="png", dpi=140, bbox_inches="tight",
+                facecolor="black", edgecolor="none")
+    plt.close(fig)
+    buf.seek(0)
+    return base64.b64encode(buf.read()).decode("utf-8")
+
+
+def business_understanding():
+    return render_template(
+        "business_understanding.html",
+        stats=classifier.get_stats(),
+        zone_summary=classifier.get_zone_summary(),
+    )
+
+
+def data_understanding_page():
+    df   = classifier.get_full_dataframe()
+    desc = df["avg_rad"].describe()
+
+    descriptive_stats = {
+        "Mínimo":  round(float(desc["min"]), 4),
+        "Mediana": round(float(desc["50%"]), 4),
+        "Media":   round(float(desc["mean"]), 4),
+        "Máximo":  round(float(desc["max"]), 4),
+        "Std Dev": round(float(desc["std"]), 4),
+        "P95":     round(float(df["avg_rad"].quantile(.95)), 4),
+    }
+
+    return render_template(
+        "data_understanding.html",
+        stats=classifier.get_stats(),
+        zone_summary=classifier.get_zone_summary(),
+        heatmap_b64=_render_heatmap(df),
+        descriptive_stats=descriptive_stats,
+    )
 
 
 # ─────────────────────────────────────────
@@ -209,25 +280,7 @@ def api_stats():
 @app.route("/fase1")
 def fase1():
     """CRISP-DM Fase 1 · Entendimiento de Datos"""
-    df   = classifier.get_full_dataframe()
-    desc = df["avg_rad"].describe()
-
-    descriptive_stats = {
-        "Mínimo":    round(float(desc["min"]),   4),
-        "Mediana":   round(float(desc["50%"]),   4),
-        "Media":     round(float(desc["mean"]),  4),
-        "Máximo":    round(float(desc["max"]),   4),
-        "Std Dev":   round(float(desc["std"]),   4),
-        "P95":       round(float(df["avg_rad"].quantile(.95)), 4),
-    }
-
-    return render_template(
-        "fase1_datos.html",
-        stats=classifier.get_stats(),
-        zone_summary=classifier.get_zone_summary(),
-        heatmap_b64=_render_heatmap(df),
-        descriptive_stats=descriptive_stats,
-    )
+    return data_understanding_page()
 
 
 @app.route("/fase2")
@@ -287,17 +340,22 @@ def methodology():
 
 @app.route("/business")
 def business():
-    return fase1()
+    return business_understanding()
 
 
 @app.route("/data-understanding")
 def data_understanding():
-    return fase1()
+    return data_understanding_page()
 
 
 @app.route("/data-engineering")
 def data_engineering():
     return fase2()
+
+
+@app.route("/evaluation")
+def evaluation():
+    return fase3()
 
 
 @app.route("/fase3")
@@ -308,6 +366,7 @@ def fase3():
         stats=classifier.get_stats(),
         zone_summary=classifier.get_zone_summary(),
         heatmap_b64=_render_heatmap(classifier.get_full_dataframe()),
+        roc_curve_b64=_render_roc_curve(classifier),
     )
 
 
@@ -316,4 +375,4 @@ def fase3():
 # ─────────────────────────────────────────
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=False)
+    app.run(host="0.0.0.0", port=port, debug=False, use_reloader=False)
