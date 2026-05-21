@@ -138,13 +138,19 @@ def home():
 @app.route("/methodology")
 def methodology():
     """CRISP-ML(Q) Methodology explanation."""
-    return render_template("methodology.html")
+    return render_template(
+        "methodology.html",
+        stats=classifier.get_stats(),
+    )
 
 
 @app.route("/business-understanding")
 def business_understanding():
     """Phase 1: Business Understanding."""
-    return render_template("business_understanding.html")
+    return render_template(
+        "business_understanding.html",
+        stats=classifier.get_stats(),
+    )
 
 
 @app.route("/data-understanding")

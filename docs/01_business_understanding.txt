@@ -3,6 +3,16 @@ PHASE 1: BUSINESS AND DATA UNDERSTANDING
 CRISP-ML(Q) Methodology
 ================================================================================
 
+EXECUTIVE SUMMARY
+================================================================================
+This document defines the business understanding for a CRISP-ML(Q) machine learning
+project that analyzes nighttime light pollution in Cundinamarca, Colombia.
+The objective is to transform satellite nighttime radiance data into actionable
+insights for environmental planners, researchers, and policymakers.
+The project will identify low, medium, and high light pollution zones, assess
+geographic patterns, and support decision-making with a public Flask-based 
+web interface.
+
 1. BUSINESS OBJECTIVES
 ================================================================================
 
@@ -21,7 +31,22 @@ generated significant variations in light intensity between municipalities and
 populated sectors. Identifying and analyzing these areas manually is difficult 
 because of the large amount of geographic and environmental information involved.
 
-1.2 Project Goal
+1.2 Motivation and Real-World Justification
+------------------------------------------
+
+Cundinamarca is experiencing rapid urban growth, including expansion around
+Bogotá, Soacha, Zipaquirá, and other municipalities. Satellite data can reveal
+how artificial lighting intensity varies across urban, peri-urban, and rural
+zones. This analysis is especially relevant because:
+    • Local planners need evidence to regulate public lighting and reduce waste.
+    • Environmental agencies lack systematic spatial information on night lights.
+    • Light pollution is linked to energy inefficiency and health impacts.
+    • Satellite data is available, standardized, and suitable for geographic analysis.
+
+This project uses VIIRS satellite radiance to deliver a timely and practical
+solution for environmental monitoring and territorial planning in Cundinamarca.
+
+1.3 Project Goal
 ----------------
 Analyze and classify nighttime light pollution levels in Cundinamarca using 
 open satellite data in order to:
@@ -30,34 +55,35 @@ open satellite data in order to:
     • Generate organized and interpretable information for stakeholders
     • Enable data-driven decision-making for urban planning and environmental management
 
-1.3 Project Objectives (SMART)
+1.4 Project Objectives (SMART)
 -------------------------------
     a) Develop a classification model that categorizes geographic zones in 
-       Cundinamarca into light pollution levels (Low/Medium/High) with ≥85% accuracy
+       Cundinamarca into light pollution levels (Low/Medium/High) with ≥85% accuracy.
     
     b) Process and prepare VIIRS nighttime lights data to create a usable dataset 
-       containing ≥8000 point observations with radiance and location information
+       containing ≥8,000 point observations with radiance and location information.
     
     c) Identify geographic patterns and hotspots of light pollution across 
-       municipalities and populated sectors in Cundinamarca
+       municipalities and populated sectors in Cundinamarca.
     
-    d) Create a web-based visualization interface enabling stakeholders to explore 
-       and interpret light pollution patterns interactively
+    d) Create a public web-based interface with navigation for CRISP-ML phases,
+       enabling stakeholders to explore and interpret results interactively.
 
-1.4 Stakeholders and Users
+1.5 Stakeholders and Users
 ---------------------------
-    • Primary: Environmental agencies and city planners in Cundinamarca
-    • Secondary: Academic researchers studying urban sustainability
-    • Tertiary: Policymakers developing light pollution regulations
-    • Technical: Data science and GIS teams conducting territorial analysis
+    • Primary: Environmental agencies and city planners in Cundinamarca.
+    • Secondary: Academic researchers studying urban sustainability.
+    • Tertiary: Policymakers developing light pollution and energy policies.
+    • Technical: Data science and GIS teams conducting territorial analysis.
 
-1.5 Expected Business Value
+1.6 Expected Business Value
 ----------------------------
-    • Data-driven insights for urban development planning
-    • Evidence base for environmental policy creation
-    • Cost reduction through optimization of public lighting infrastructure
-    • Foundation for future environmental monitoring systems
-    • Academic contribution to environmental science in the region
+    • Provide data-driven insights for urban development planning.
+    • Support evidence-based policy creation on public lighting and energy use.
+    • Identify critical areas for intervention and prioritize mitigation.
+    • Reduce energy waste through optimized lighting strategies.
+    • Create a baseline for future environmental monitoring systems.
+    • Increase transparency and accessibility via a public web interface.
 
 ================================================================================
 2. KEY RESEARCH QUESTIONS
@@ -98,6 +124,10 @@ open satellite data in order to:
     
     10. How do variations in atmospheric conditions, cloud cover, and seasonal 
         factors affect radiance measurements?
+    
+    11. What limitations arise from using satellite-derived radiance instead of
+        direct ground-based light pollution measurements?
+
     
     11. Is there sufficient data variability to train a robust classification model?
 
