@@ -24,9 +24,14 @@ pip install -r requirements.txt
 
 ## Run locally
 
-```bash
-python app.py
+If you are on Windows, use the included batch file:
+
+```bat
+cd "C:\Users\Leo\Documents\ML PROYECTO\Clasificacion_zonas_urbanas"
+run.bat
 ```
+
+The script will create `.venv_local` and install dependencies if needed, then start the app.
 
 Then visit `http://127.0.0.1:5000`.
 
