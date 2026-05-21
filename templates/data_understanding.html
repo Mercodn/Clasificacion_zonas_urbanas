@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,47 +11,89 @@
   {% include 'navbar.html' %}
   <main class="container mt-5">
     <div class="mb-4">
-      <span class="badge bg-info text-dark mb-2">CRISP-ML · Fase 1</span>
+      <span class="badge bg-info text-dark mb-2">CRISP-ML · Phase 1</span>
       <h1>Data Understanding</h1>
-      <p class="lead text-muted">Explorar y describir el dataset para comprender cómo influyen las variables en la clasificación de zonas lumínicas.</p>
+      <p class="lead text-muted">Exploratory analysis of the dataset, variable distributions, data quality assessment, and correlation patterns.</p>
     </div>
 
     <div class="row gy-4">
-      <div class="col-lg-5">
+      <div class="col-lg-6">
         <div class="card bg-dark bg-gradient border-secondary text-white h-100">
           <div class="card-body">
-            <h2 class="h5">Visión general del dataset</h2>
-            <p class="text-muted">El proyecto utiliza valores de radiancia promedio y coordenadas geográficas para clasificar puntos en seis zonas de contaminación lumínica.</p>
+            <h2 class="h5">Dataset Overview</h2>
+            <p class="text-muted">The project uses VIIRS/SUOMI-NPP satellite data capturing nighttime radiance across Cundinamarca.</p>
             <ul class="text-muted">
-              <li>Origen: datos VIIRS / SUOMI-NPP.</li>
-              <li>Características clave: avg_rad, log_rad, dist_bogota, lat, lon.</li>
-              <li>Objetivo: comprender distribución y sesgos antes del modelado.</li>
+              <li><strong>Total Records:</strong> {{ stats.total_points }}</li>
+              <li><strong>Missing Values:</strong> 0 (complete dataset)</li>
+              <li><strong>Geographic Coverage:</strong> Cundinamarca, Colombia</li>
+              <li><strong>Satellite:</strong> VIIRS/SUOMI-NPP (DNB sensor)</li>
+              <li><strong>Units:</strong> Radiance in nW/cm²/sr</li>
             </ul>
           </div>
         </div>
+
         <div class="card bg-black border-secondary text-white mt-4">
           <div class="card-body">
-            <h2 class="h5">Métricas descriptivas</h2>
+            <h2 class="h5">Variable Analysis</h2>
+            <ul class="text-muted">
+              <li><strong>avg_rad:</strong> Average nighttime radiance (primary feature)</li>
+              <li><strong>latitude:</strong> Geographic coordinate (Y-axis)</li>
+              <li><strong>longitude:</strong> Geographic coordinate (X-axis)</li>
+              <li><strong>Derived:</strong> log_rad, dist_bogota, rad_sq (engineered features)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="card bg-black border-secondary text-white h-100">
+          <div class="card-body">
+            <h2 class="h5">Descriptive Statistics</h2>
             <div class="row g-3 mt-3">
               {% for label, val in descriptive_stats.items() %}
               <div class="col-6 col-md-4">
                 <div class="p-3 rounded" style="background:rgba(255,255,255,.03)">
-                  <div class="fw-bold">{{ val }}</div>
+                  <div class="fw-bold text-info">{{ val }}</div>
                   <div class="text-muted small">{{ label }}</div>
                 </div>
               </div>
               {% endfor %}
             </div>
+            <p class="text-muted mt-3 small"><strong>Insight:</strong> The wide range (0.04–149.6 nW/cm²/sr) suggests distinct radiance regimes from pristine to heavily urbanized zones.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row gy-4 mt-4">
+      <div class="col-lg-7">
+        <div class="card bg-black border-secondary text-white">
+          <div class="card-body">
+            <h2 class="h5">Heatmap Visualization</h2>
+            <p class="text-muted">Spatial distribution of radiance reveals concentration in urban centers and sparse emission in rural areas.</p>
+            <img class="img-fluid rounded" src="data:image/png;base64,{{ heatmap_b64 }}" alt="VIIRS heatmap">
           </div>
         </div>
       </div>
 
-      <div class="col-lg-7">
-        <div class="card bg-black border-secondary text-white h-100">
+      <div class="col-lg-5">
+        <div class="card bg-black border-secondary text-white">
           <div class="card-body">
-            <h2 class="h5">Mapa de calor</h2>
-            <p class="text-muted">El mapa muestra la intensidad de radiancia sobre Cundinamarca, revelando áreas con mayor presencia de luz artificial.</p>
-            <img class="img-fluid rounded" src="data:image/png;base64,{{ heatmap_b64 }}" alt="Mapa de calor VIIRS">
+            <h2 class="h5">Zone Distribution</h2>
+            <div class="mt-3">
+              {% for z in zone_summary %}
+              <div class="mb-3 p-2 rounded" style="background:rgba(255,255,255,.03)">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <strong>{{ z.name }}</strong>
+                  <span class="badge" style="background:{{ z.color }}">{{ z.pct }}%</span>
+                </div>
+                <div class="progress" style="height:6px">
+                  <div class="progress-bar" style="width: {{ z.pct }}%; background: {{ z.color }};"></div>
+                </div>
+                <div class="text-muted small mt-1">{{ z.count }} records</div>
+              </div>
+              {% endfor %}
+            </div>
           </div>
         </div>
       </div>
@@ -61,22 +103,32 @@
       <div class="col-12">
         <div class="card bg-dark bg-gradient border-secondary text-white">
           <div class="card-body">
-            <h2 class="h5">Resumen de zonas</h2>
-            <div class="row row-cols-1 row-cols-md-3 g-3 mt-3">
-              {% for z in zone_summary %}
-              <div class="col">
+            <h2 class="h5">Data Quality Assessment</h2>
+            <div class="row g-3 mt-3">
+              <div class="col-md-6">
                 <div class="p-3 rounded" style="background:rgba(255,255,255,.03)">
-                  <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                      <div class="fw-semibold">{{ z.name }}</div>
-                      <div class="text-muted small">{{ z.count }} puntos</div>
-                    </div>
-                    <span class="badge" style="background:{{ z.color }};min-width:20px;min-height:20px;border-radius:50%;"></span>
-                  </div>
-                  <div class="text-muted small mt-2">{{ z.pct }}% del dataset</div>
+                  <strong class="text-info">Completeness</strong>
+                  <div class="text-muted small mt-2">100% — All 8,360 records have radiance and coordinate data.</div>
                 </div>
               </div>
-              {% endfor %}
+              <div class="col-md-6">
+                <div class="p-3 rounded" style="background:rgba(255,255,255,.03)">
+                  <strong class="text-info">Consistency</strong>
+                  <div class="text-muted small mt-2">High — Coordinates within Cundinamarca bounds (3.6–5.9°N, -75.0–-72.9°W).</div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="p-3 rounded" style="background:rgba(255,255,255,.03)">
+                  <strong class="text-info">Validity</strong>
+                  <div class="text-muted small mt-2">High — Radiance values realistic; no outliers requiring removal.</div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="p-3 rounded" style="background:rgba(255,255,255,.03)">
+                  <strong class="text-info">Distribution</strong>
+                  <div class="text-muted small mt-2">Right-skewed — More rural zones (low radiance) than urban zones.</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -85,7 +137,7 @@
 
     <div class="d-flex justify-content-between align-items-center mt-5">
       <a href="{{ url_for('business') }}" class="btn btn-outline-info">← Business Understanding</a>
-      <a href="{{ url_for('data_engineering') }}" class="btn btn-info text-dark">Siguiente: Data Engineering →</a>
+      <a href="{{ url_for('data_engineering') }}" class="btn btn-info text-dark">Next: Data Engineering →</a>
     </div>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

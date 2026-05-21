@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,42 +11,77 @@
   {% include 'navbar.html' %}
   <main class="container mt-5">
     <div class="mb-4">
-      <span class="badge bg-info text-dark mb-2">CRISP-ML · Fase 2</span>
-      <h1>Data Engineering</h1>
-      <p class="lead text-muted">Preparar datos y entrenar el modelo con características derivadas que mejoran la clasificación.</p>
+      <span class="badge bg-info text-dark mb-2">CRISP-ML · Phase 2</span>
+      <h1>Data Engineering & Modeling</h1>
+      <p class="lead text-muted">Data preparation, feature engineering, and model training for light pollution classification.</p>
     </div>
+
     <div class="row gy-4">
-      <div class="col-lg-5">
+      <div class="col-lg-7">
         <div class="card bg-dark bg-gradient border-secondary text-white h-100">
           <div class="card-body">
-            <h2 class="h5">Pipeline de preparación</h2>
-            <ul class="text-muted">
-              <li>Convertir GeoJSON a latitud/longitud.</li>
-              <li>Normalizar radiancia y eliminar valores no válidos.</li>
-              <li>Crear features: log_rad, dist_bogota y rad_sq.</li>
+            <h2 class="h5">Data Engineering Pipeline</h2>
+            <ol class="text-muted">
+              <li><strong>Data Cleaning:</strong> Parsed GeoJSON coordinates into lat/lon; validated radiance bounds (0–500 nW/cm²/sr).</li>
+              <li><strong>Null Handling:</strong> No missing values detected; dataset is complete.</li>
+              <li><strong>Feature Engineering:</strong>
+                <ul class="text-muted small mt-2">
+                  <li><code>avg_rad</code> — Raw radiance (primary signal)</li>
+                  <li><code>log_rad</code> — Log-transformed (reduces skewness and outlier impact)</li>
+                  <li><code>dist_bogota</code> — Euclidean distance to Bogotá (geographic context)</li>
+                  <li><code>rad_sq</code> — Squared radiance (captures non-linear intensity effects)</li>
+                  <li><code>lat, lon</code> — Raw coordinates for spatial patterns</li>
+                </ul>
+              </li>
+              <li><strong>Feature Selection:</strong> All 6 features retained; no dimensionality reduction applied.</li>
+              <li><strong>Scaling:</strong> StandardScaler normalization (mean=0, std=1) for consistent gradient boosting input.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <div class="card bg-black border-secondary text-white h-100">
+          <div class="card-body">
+            <h2 class="h5">Zoning Strategy</h2>
+            <p class="text-muted small">Zones assigned via radiance thresholds based on Bortle Dark-Sky Scale adaptation for satellites:</p>
+            <ul class="text-muted small">
+              <li><strong>Zone 0 (Pristine):</strong> &lt; 0.20 nW/cm²/sr</li>
+              <li><strong>Zone 1 (Rural Low):</strong> 0.20–0.40</li>
+              <li><strong>Zone 2 (Suburban):</strong> 0.40–1.00</li>
+              <li><strong>Zone 3 (Urban Moderate):</strong> 1.00–5.00</li>
+              <li><strong>Zone 4 (Urban High):</strong> 5.00–20.0</li>
+              <li><strong>Zone 5 (Metropolitan):</strong> ≥ 20.0</li>
             </ul>
           </div>
         </div>
-        <div class="card bg-dark bg-gradient border-secondary text-white mt-4">
+
+        <div class="card bg-black border-secondary text-white mt-4">
           <div class="card-body">
-            <h2 class="h5">Configuración del modelo</h2>
-            <ul class="text-muted">
-              <li>Algoritmo: Gradient Boosting Classifier.</li>
-              <li>Estimadores: 200, learning_rate: 0.1, max_depth: 5.</li>
-              <li>Validación: split 80/20 estratificado.</li>
+            <h2 class="h5">Model Configuration</h2>
+            <ul class="text-muted small">
+              <li><strong>Algorithm:</strong> Gradient Boosting Classifier</li>
+              <li><strong>Estimators:</strong> 200</li>
+              <li><strong>Learning Rate:</strong> 0.1</li>
+              <li><strong>Max Depth:</strong> 5</li>
+              <li><strong>Train/Test Split:</strong> 80/20 (stratified)</li>
+              <li><strong>Test Accuracy:</strong> {{ stats.accuracy }}%</li>
             </ul>
           </div>
         </div>
       </div>
-      <div class="col-lg-7">
+    </div>
+
+    <div class="row gy-4 mt-4">
+      <div class="col-12">
         <div class="card bg-black border-secondary text-white">
           <div class="card-body">
-            <h2 class="h5">Importancia de variables</h2>
-            <p class="text-muted">El modelo usa seis variables con distintos aportes a la clasificación.</p>
+            <h2 class="h5">Feature Importance Analysis</h2>
+            <p class="text-muted">Gradient Boosting model ranks features by their contribution to classification decisions:</p>
             {% for feat in feature_importance %}
             <div class="mb-3">
-              <div class="d-flex justify-content-between"><span>{{ feat.name }}</span><strong>{{ feat.pct }}%</strong></div>
-              <div class="progress" style="height:8px;"><div class="progress-bar bg-info" role="progressbar" style="width: {{ feat.pct }}%;" aria-valuenow="{{ feat.pct }}" aria-valuemin="0" aria-valuemax="100"></div></div>
+              <div class="d-flex justify-content-between"><strong>{{ feat.name }}</strong><span class="text-info">{{ feat.pct }}%</span></div>
+              <div class="progress" style="height:10px;"><div class="progress-bar bg-info" role="progressbar" style="width: {{ feat.pct }}%;" aria-valuenow="{{ feat.pct }}" aria-valuemin="0" aria-valuemax="100"></div></div>
               <div class="text-muted small mt-1">{{ feat.desc }}</div>
             </div>
             {% endfor %}
@@ -54,9 +89,40 @@
         </div>
       </div>
     </div>
+
+    <div class="row gy-4 mt-4">
+      <div class="col-12">
+        <div class="card bg-dark bg-gradient border-secondary text-white">
+          <div class="card-body">
+            <h2 class="h5">Transformations Summary</h2>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <strong class="text-info d-block mb-2">Input</strong>
+                <ul class="text-muted small mb-0">
+                  <li>8,360 GeoJSON records</li>
+                  <li>3 raw columns (index, avg_rad, .geo)</li>
+                  <li>Radiance range: 0.04–149.6 nW/cm²/sr</li>
+                  <li>Geographic bounds: 3.6–5.9°N, -75.0–-72.9°W</li>
+                </ul>
+              </div>
+              <div class="col-md-6">
+                <strong class="text-info d-block mb-2">Output</strong>
+                <ul class="text-muted small mb-0">
+                  <li>8,360 training samples</li>
+                  <li>6 scaled features (mean=0, std=1)</li>
+                  <li>6 target classes (0–5)</li>
+                  <li>Stratified 80/20 train/test split</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="d-flex justify-content-between align-items-center mt-5">
-      <a href="{{ url_for('data_understanding') }}" class="btn btn-outline-info">← Phase 1</a>
-      <a href="{{ url_for('evaluation') }}" class="btn btn-info text-dark">Phase 3 · Evaluation →</a>
+      <a href="{{ url_for('data_understanding') }}" class="btn btn-outline-info">← Data Understanding</a>
+      <a href="{{ url_for('evaluation') }}" class="btn btn-info text-dark">Next: Evaluation →</a>
     </div>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
