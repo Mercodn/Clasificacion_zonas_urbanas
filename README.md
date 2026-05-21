@@ -27,11 +27,7 @@ pip install -r requirements.txt
 ## Run locally
 
 Use the included batch file on Windows:
-
-```bat
-cd "C:\Users\Leo\Documents\ML PROYECTO\Clasificacion_zonas_urbanas"
-run.bat
-```
+use the executable.bat
 
 This will start the app locally on `http://127.0.0.1:5000`.
 
