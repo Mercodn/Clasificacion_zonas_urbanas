@@ -1,64 +1,24 @@
-{# ══════════════════════════════════════════════════════════════
-   navbar.html  ·  Componente de navegación reutilizable
-   Fases CRISP-DM  ·  LightScan · JoanMoreno
-   Uso: {% include 'navbar.html' %}
-   ══════════════════════════════════════════════════════════════ #}
-
-<nav class="navbar navbar-expand-lg ls-navbar">
+﻿<nav class="navbar navbar-expand-lg ls-navbar">
   <div class="container-fluid px-4">
-
-    <!-- ── LOGO ── -->
-    <a class="navbar-brand ls-brand" href="#hero">
+    <a class="navbar-brand ls-brand" href="{{ url_for('index') }}">
       <span class="ls-brand-dot"></span>
       LightScan
     </a>
-
-    <!-- ── TOGGLE MOBILE ── -->
-    <button class="navbar-toggler ls-toggler" type="button"
-            data-bs-toggle="collapse" data-bs-target="#navMain"
-            aria-controls="navMain" aria-expanded="false" aria-label="Menú">
+    <button class="navbar-toggler ls-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain" aria-controls="navMain" aria-expanded="false" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
-
-    <!-- ── FASES CRISP-DM ── -->
     <div class="collapse navbar-collapse justify-content-center" id="navMain">
       <ul class="navbar-nav ls-nav-phases gap-2">
-
-        <!-- FASE 1 · Entendimiento de Datos -->
-        <li class="nav-item">
-          <a class="ls-phase-btn" href="{{ url_for('fase1') }}" data-fase="1">
-            <span class="ls-phase-num">1</span>
-            <span class="ls-phase-label">Entendimiento<br>de Datos</span>
-          </a>
-        </li>
-
-        <!-- FASE 2 · Modelado -->
-        <li class="nav-item">
-          <a class="ls-phase-btn" href="{{ url_for('fase2') }}" data-fase="2">
-            <span class="ls-phase-num">2</span>
-            <span class="ls-phase-label">Modelado<br>ML</span>
-          </a>
-        </li>
-
-        <!-- FASE 3 · Evaluación & Despliegue -->
-        <li class="nav-item">
-          <a class="ls-phase-btn" href="{{ url_for('fase3') }}" data-fase="3">
-            <span class="ls-phase-num">3</span>
-            <span class="ls-phase-label">Evaluación &<br>Despliegue</span>
-          </a>
-        </li>
-
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('methodology') }}">CRISP-ML Methodology</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('business') }}">Business Understanding</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('data_understanding') }}">Data Understanding</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('data_engineering') }}">Data Engineering</a></li>
       </ul>
     </div>
-
-    <!-- ── BADGES DERECHA ── -->
     <div class="d-none d-lg-flex align-items-center gap-3 ls-nav-right">
-      <span class="ls-badge-model">
-        GradientBoosting · {{ stats.accuracy }}% acc
-      </span>
+      <span class="ls-badge-model">GradientBoosting · {{ stats.accuracy }}% acc</span>
       <span class="ls-nav-tag">VIIRS / SUOMI-NPP</span>
-      <span class="ls-nav-tag ls-nav-author">JoanMoreno</span>
     </div>
-
   </div>
 </nav>

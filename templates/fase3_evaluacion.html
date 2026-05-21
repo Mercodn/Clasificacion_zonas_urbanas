@@ -1,342 +1,54 @@
-<!DOCTYPE html>
-<html lang="es">
+﻿<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LightScan · Fase 3 · Evaluación & Despliegue</title>
+  <title>LightScan · Evaluation & Deployment</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
-
-{% include 'navbar.html' %}
-
-<!-- ── HERO FASE 3 ── -->
-<section class="hero" id="hero">
-  <div class="container">
-    <div class="hero-tag">CRISP-DM · Fase 3 de 3</div>
-    <h1>Evaluación & <span>Despliegue</span></h1>
-    <p class="hero-sub">Métricas del modelo · Predicción en tiempo real · API REST Flask</p>
-  </div>
-</section>
-
-
-</section>
-  <!-- ========================= -->
-  <!-- BUSINESS UNDERSTANDING -->
-  <!-- ========================= -->
-
-  <section class="ls-business-section">
-
-    <div class="ls-business-header">
-
-      <h2 class="ls-business-title">
-        titulo
-      </h2>
-
-      <p class="ls-business-subtitle">
-texto
-      </p>
+  {% include 'navbar.html' %}
+  <main class="container mt-5">
+    <div class="mb-4">
+      <span class="badge bg-info text-dark mb-2">CRISP-ML · Phase 3 of 3</span>
+      <h1>Evaluation & Deployment</h1>
+      <p class="lead text-muted">Measure model performance and expose prediction endpoints for real use.</p>
     </div>
-
-    <div class="ls-business-content">
-
-      <p class="ls-business-text">
-        texto
-      </p>
-
-      <p class="ls-business-text">
-        texto
-      </p>
-
-      <p class="ls-business-text">
-        texto
-      </p>
-
-      <p class="ls-business-text">
-        texto
-      </p>
-       
-      <h2 class="ls-business-title">
-         titulo
-      </h2>
-        
-      <p class="ls-business-text">
-        
-      </p>
-
-      <p class="ls-business-text">
-
-      </p>
-
-      <p class="ls-business-text">
-
-      </p>
-
-      <p class="ls-business-text">
-
-      </p>
-
-      <p class="ls-business-text">
-
-      </p>
-
-      <p class="ls-business-text">
-
-      </p>
-
-    </div>
-
-  </section>
-
-<!-- ── STATS EVALUACIÓN ── -->
-<div class="container mb-4" style="position:relative;z-index:1">
-  <div class="row g-3">
-    <div class="col-6 col-md-3">
-      <div class="stat-card">
-        <div class="stat-val text-accent">{{ stats.accuracy }}%</div>
-        <div class="stat-lbl">Accuracy global</div>
+    <div class="row gy-4">
+      <div class="col-lg-5">
+        <div class="card bg-dark bg-gradient border-secondary text-white h-100">
+          <div class="card-body">
+            <h2 class="h5">Performance summary</h2>
+            <ul class="text-muted">
+              <li>Accuracy: {{ stats.accuracy }}%</li>
+              <li>Data points: {{ stats.total_points }}</li>
+              <li>Deployment framework: Flask + Gunicorn</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card bg-dark bg-gradient border-secondary text-white mt-4">
+          <div class="card-body">
+            <h2 class="h5">Prediction API</h2>
+            <p class="text-muted small mb-2">POST /predict</p>
+            <p class="text-muted">Send JSON with lat, lon, avg_rad to receive a zone prediction and probability.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-7">
+        <div class="card bg-black border-secondary text-white">
+          <div class="card-body">
+            <h2 class="h5">Result heatmap</h2>
+            <img class="img-fluid rounded" src="data:image/png;base64,{{ heatmap_b64 }}" alt="Heatmap result">
+          </div>
+        </div>
       </div>
     </div>
-    <div class="col-6 col-md-3">
-      <div class="stat-card">
-        <div class="stat-val">{{ stats.total_points }}</div>
-        <div class="stat-lbl">Puntos evaluados</div>
-      </div>
+    <div class="d-flex justify-content-between align-items-center mt-5">
+      <a href="{{ url_for('data_engineering') }}" class="btn btn-outline-info">← Phase 2</a>
+      <a href="{{ url_for('index') }}" class="btn btn-info text-dark">Home</a>
     </div>
-    <div class="col-6 col-md-3">
-      <div class="stat-card">
-        <div class="stat-val">4</div>
-        <div class="stat-lbl">Rutas API activas</div>
-      </div>
-    </div>
-    <div class="col-6 col-md-3">
-      <div class="stat-card">
-        <div class="stat-val">Flask</div>
-        <div class="stat-lbl">Framework deploy</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ── CONTENIDO PRINCIPAL ── -->
-<div class="container mb-5" style="position:relative;z-index:1">
-  <div class="row g-4">
-
-    <!-- COL IZQUIERDA -->
-    <div class="col-lg-5">
-
-      <!-- Predicción en tiempo real -->
-      <div class="panel mb-4">
-        <div class="panel-header">
-          <div class="panel-icon" style="background:rgba(0,212,255,.1)"></div>
-          <div class="panel-title">Predicción en Tiempo Real</div>
-        </div>
-        <div class="panel-body">
-          <p class="text-dim mb-3" style="font-size:11px;line-height:1.7">
-            Ingresa coordenadas y radiancia para clasificar cualquier punto de Cundinamarca.
-          </p>
-
-          <form id="eval-form">
-            <div class="mb-3">
-              <label class="form-label">Latitud</label>
-              <input type="number" id="inp-lat" class="form-control"
-                     placeholder="4.7110" step="0.0001" min="3.6" max="5.9" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Longitud</label>
-              <input type="number" id="inp-lon" class="form-control"
-                     placeholder="-74.0721" step="0.0001" min="-75.0" max="-72.9" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Radiancia <span class="text-dim">(nW/cm²/sr)</span></label>
-              <input type="number" id="inp-rad" class="form-control"
-                     placeholder="ej: 3.45" step="0.0001" min="0" max="500" required>
-            </div>
-            <div class="d-grid gap-2">
-              <button type="submit" id="btn-submit" class="btn-predict">▶ Clasificar Zona</button>
-              <button type="button" id="btn-demo" class="btn-demo">↻ Cargar demo</button>
-            </div>
-          </form>
-
-          <div id="error-msg" class="alert-err mt-3"></div>
-
-          <div id="spinner-wrap" class="spinner-wrap mt-3">
-            <div class="spinner"></div>
-            Procesando modelo...
-          </div>
-        </div>
-      </div>
-
-      <!-- Resultado -->
-      <div id="result-panel" class="panel">
-        <div class="panel-header">
-          <div class="panel-icon" style="background:rgba(0,255,128,.08)"></div>
-          <div class="panel-title">Resultado de Clasificación</div>
-        </div>
-        <div class="panel-body">
-          <div id="res-badge"></div>
-          <div id="res-coords" class="result-coord mono"></div>
-          <div id="res-desc" class="result-desc"></div>
-
-          <div class="section-title mt-3">Confianza del modelo</div>
-          <div class="d-flex justify-content-between align-items-center mb-1">
-            <span style="font-size:10px;color:var(--text-muted)">Probabilidad de clase predicha</span>
-            <span id="res-conf-val" class="text-accent mono" style="font-size:11px;font-weight:700"></span>
-          </div>
-          <div class="confidence-bar mb-3">
-            <div id="res-conf-fill" class="confidence-fill" style="width:0%"></div>
-          </div>
-
-          <div class="section-title">Distribución de clases</div>
-          <div id="res-probs"></div>
-        </div>
-      </div>
-
-    </div><!-- /col izquierda -->
-
-    <!-- COL DERECHA -->
-    <div class="col-lg-7">
-
-      <!-- Heatmap resultado -->
-      <div class="panel mb-4">
-        <div class="panel-header">
-          <div class="panel-icon" style="background:rgba(255,80,0,.08)"></div>
-          <div class="panel-title">Mapa de Calor · Resultado Clasificación</div>
-        </div>
-        <div class="panel-body p-0">
-          <div class="heatmap-container">
-            <img id="heatmap-img"
-                 src="data:image/png;base64,{{ heatmap_b64 }}"
-                 alt="Mapa de calor de contaminación lumínica">
-          </div>
-        </div>
-      </div>
-
-      <!-- Rutas API -->
-      <div class="panel mb-4">
-        <div class="panel-header">
-          <div class="panel-icon" style="background:rgba(0,255,128,.06)"></div>
-          <div class="panel-title">API REST · Endpoints Disponibles</div>
-        </div>
-        <div class="panel-body">
-          {% set endpoints = [
-            ('GET',  '/',            'Página principal con heatmap y leyenda completa'),
-            ('POST', '/predict',     'Clasifica un punto {lat, lon, avg_rad} → zona + confianza'),
-            ('GET',  '/api/data',    '500 puntos VIIRS para mapa Leaflet interactivo'),
-            ('GET',  '/api/stats',   'Métricas del modelo y distribución de zonas'),
-            ('GET',  '/fase1',       'Fase 1 CRISP-DM · Entendimiento de Datos'),
-            ('GET',  '/fase2',       'Fase 2 CRISP-DM · Modelado ML'),
-            ('GET',  '/fase3',       'Fase 3 CRISP-DM · Evaluación & Despliegue'),
-          ] %}
-          {% for method, ruta, desc in endpoints %}
-          <div class="d-flex align-items-start gap-3 mb-2 p-2"
-               style="background:var(--bg2);border-radius:6px;border:1px solid var(--border)">
-            <span class="mono" style="
-              font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;flex-shrink:0;margin-top:1px;
-              {% if method == 'GET' %}background:rgba(0,212,255,.15);color:var(--accent);
-              {% else %}background:rgba(0,255,128,.12);color:#00FF80;{% endif %}
-            ">{{ method }}</span>
-            <div>
-              <div class="mono" style="font-size:11px;color:var(--text)">{{ ruta }}</div>
-              <div style="font-size:10px;color:var(--text-muted)">{{ desc }}</div>
-            </div>
-          </div>
-          {% endfor %}
-        </div>
-      </div>
-
-      <!-- Métricas por clase -->
-      <div class="panel">
-        <div class="panel-header">
-          <div class="panel-icon" style="background:rgba(255,179,0,.08)"></div>
-          <div class="panel-title">Métricas por Clase · Classification Report</div>
-        </div>
-        <div class="panel-body">
-          <div class="row g-2">
-            {% for z in zone_summary %}
-            <div class="col-md-6">
-              <div class="zone-legend-item">
-                <div class="zone-dot" style="background:{{ z.color }};box-shadow:0 0 6px {{ z.color }}88"></div>
-                <div style="flex:1;min-width:0">
-                  <div class="zone-name" style="font-size:10px">{{ z.name }}</div>
-                  <div class="d-flex gap-3 mt-1">
-                    <span style="font-size:9px;color:var(--text-muted)">
-                      P: <span class="mono" style="color:{{ z.color }}">1.00</span>
-                    </span>
-                    <span style="font-size:9px;color:var(--text-muted)">
-                      R: <span class="mono" style="color:{{ z.color }}">1.00</span>
-                    </span>
-                    <span style="font-size:9px;color:var(--text-muted)">
-                      F1: <span class="mono" style="color:{{ z.color }}">1.00</span>
-                    </span>
-                  </div>
-                </div>
-                <div style="font-size:9px;color:var(--text-muted);text-align:right">
-                  {{ z.count }}<br>muestras
-                </div>
-              </div>
-            </div>
-            {% endfor %}
-          </div>
-
-          <div class="mt-3 p-3" style="background:var(--bg2);border-radius:8px;border:1px solid var(--border)">
-            <div class="section-title mb-2">Resumen del proyecto</div>
-            <div class="row g-2" style="font-size:11px;color:var(--text-dim)">
-              <div class="col-6 col-md-4">
-                <span class="text-muted d-block" style="font-size:9px;text-transform:uppercase;letter-spacing:.1em">Modelo</span>
-                <span class="mono text-accent">GradientBoosting</span>
-              </div>
-              <div class="col-6 col-md-4">
-                <span class="text-muted d-block" style="font-size:9px;text-transform:uppercase;letter-spacing:.1em">Accuracy</span>
-                <span class="mono text-accent">{{ stats.accuracy }}%</span>
-              </div>
-              <div class="col-6 col-md-4">
-                <span class="text-muted d-block" style="font-size:9px;text-transform:uppercase;letter-spacing:.1em">Framework</span>
-                <span class="mono" style="color:var(--text)">Flask + Python</span>
-              </div>
-              <div class="col-6 col-md-4">
-                <span class="text-muted d-block" style="font-size:9px;text-transform:uppercase;letter-spacing:.1em">Dataset</span>
-                <span class="mono" style="color:var(--text)">{{ stats.total_points }} pts VIIRS</span>
-              </div>
-              <div class="col-6 col-md-4">
-                <span class="text-muted d-block" style="font-size:9px;text-transform:uppercase;letter-spacing:.1em">Región</span>
-                <span class="mono" style="color:var(--text)">Cundinamarca, CO</span>
-              </div>
-              <div class="col-6 col-md-4">
-                <span class="text-muted d-block" style="font-size:9px;text-transform:uppercase;letter-spacing:.1em">Autor</span>
-                <span class="mono text-accent">JoanMoreno</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div><!-- /col derecha -->
-  </div>
-</div>
-
-<!-- ── NAV ENTRE FASES ── -->
-<div class="container mb-5" style="position:relative;z-index:1">
-  <div class="d-flex justify-content-between align-items-center">
-    <a href="{{ url_for('fase2') }}" class="btn-demo" style="width:auto;padding:.6rem 1.4rem;text-decoration:none">
-      ← Fase 2 · Modelado
-    </a>
-    <span class="text-dim" style="font-size:11px">Fase 3 de 3 · CRISP-DM</span>
-    <a href="{{ url_for('index') }}" class="btn-predict" style="width:auto;padding:.6rem 1.6rem;text-decoration:none">
-      Inicio
-    </a>
-  </div>
-</div>
-
-<!-- ── FOOTER ── -->
-<footer>
-  <div class="container">
-    <p><span>LightScan</span> · Fase 3 · Evaluación & Despliegue · <span>JoanMoreno</span></p>
-  </div>
-</footer>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

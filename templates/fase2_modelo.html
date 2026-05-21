@@ -1,324 +1,64 @@
-<!DOCTYPE html>
-<html lang="es">
+﻿<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LightScan · Fase 2 · Modelado ML</title>
+  <title>LightScan · Data Engineering</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
-
-{% include 'navbar.html' %}
-
-<!-- ── HERO FASE 2 ── -->
-<section class="hero" id="hero">
-  <div class="container">
-    <div class="hero-tag">CRISP-DM · Fase 2 de 3</div>
-    <h1>Modelado <span>Machine Learning</span></h1>
-    <p class="hero-sub">Ingeniería de features · Entrenamiento · Gradient Boosting Classifier</p>
-  </div>
-</section>
-
-</section>
-  <!-- ========================= -->
-  <!-- BUSINESS UNDERSTANDING -->
-  <!-- ========================= -->
-
-  <section class="ls-business-section">
-
-    <div class="ls-business-header">
-      <span class="ls-business-badge">
-      titulo
-      </span>
-
-      <h2 class="ls-business-title">
-        titulo
-      </h2>
-
-      <p class="ls-business-subtitle">
-texto
-      </p>
+  {% include 'navbar.html' %}
+  <main class="container mt-5">
+    <div class="mb-4">
+      <span class="badge bg-info text-dark mb-2">CRISP-ML · Phase 2 of 3</span>
+      <h1>Data Engineering</h1>
+      <p class="lead text-muted">Clean, transform, and prepare the dataset for modeling with engineered features.</p>
     </div>
-
-    <div class="ls-business-content">
-
-      <p class="ls-business-text">
-        texto
-      </p>
-
-      <p class="ls-business-text">
-        texto
-      </p>
-
-      <p class="ls-business-text">
-        texto
-      </p>
-
-      <p class="ls-business-text">
-        texto
-      </p>
-       
-      <h2 class="ls-business-title">
-         titulo
-      </h2>
-        
-      <p class="ls-business-text">
-        
-      </p>
-
-      <p class="ls-business-text">
-
-      </p>
-
-      <p class="ls-business-text">
-
-      </p>
-
-      <p class="ls-business-text">
-
-      </p>
-
-      <p class="ls-business-text">
-
-      </p>
-
-      <p class="ls-business-text">
-
-      </p>
-
-    </div>
-
-  </section>
-  
-<!-- ── STATS MODELO ── -->
-<div class="container mb-4" style="position:relative;z-index:1">
-  <div class="row g-3">
-    <div class="col-6 col-md-3">
-      <div class="stat-card">
-        <div class="stat-val text-accent">{{ model_info.accuracy }}%</div>
-        <div class="stat-lbl">Exactitud test set</div>
-      </div>
-    </div>
-    <div class="col-6 col-md-3">
-      <div class="stat-card">
-        <div class="stat-val">200</div>
-        <div class="stat-lbl">Estimadores</div>
-      </div>
-    </div>
-    <div class="col-6 col-md-3">
-      <div class="stat-card">
-        <div class="stat-val">6</div>
-        <div class="stat-lbl">Features</div>
-      </div>
-    </div>
-    <div class="col-6 col-md-3">
-      <div class="stat-card">
-        <div class="stat-val">80/20</div>
-        <div class="stat-lbl">Train / Test split</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ── CONTENIDO PRINCIPAL ── -->
-<div class="container mb-5" style="position:relative;z-index:1">
-  <div class="row g-4">
-
-    <!-- COL IZQUIERDA -->
-    <div class="col-lg-5">
-
-      <!-- Por qué Gradient Boosting -->
-      <div class="panel mb-4">
-        <div class="panel-header">
-          <div class="panel-icon" style="background:rgba(0,212,255,.1)">⚙️</div>
-          <div class="panel-title">Algoritmo Seleccionado</div>
-        </div>
-        <div class="panel-body">
-          <div class="hero-tag d-inline-block mb-3" style="font-size:11px">
-            GradientBoostingClassifier · scikit-learn
+    <div class="row gy-4">
+      <div class="col-lg-5">
+        <div class="card bg-dark bg-gradient border-secondary text-white h-100">
+          <div class="card-body">
+            <h2 class="h5">Data preparation</h2>
+            <ul class="text-muted">
+              <li>Parse GeoJSON coordinates into lat/lon values.</li>
+              <li>Validate and normalize average radiance data.</li>
+              <li>Create features like log_rad, dist_bogota, and rad_sq.</li>
+            </ul>
           </div>
-          <p class="text-dim mb-3" style="font-size:12px;line-height:1.8">
-            Se eligió <b class="text-accent">Gradient Boosting</b> por ser el algoritmo con mejor
-            rendimiento para clasificación con features mixtos (numéricos + geoespaciales),
-            robusto ante outliers de radiancia y sin necesidad de normalización estricta.
-          </p>
-
-          <div class="section-title">Hiperparámetros</div>
-          <div class="p-3" style="background:var(--bg2);border-radius:8px;border:1px solid var(--border)">
-            {% for param, val in model_info.params.items() %}
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <span class="mono" style="font-size:11px;color:var(--text-dim)">{{ param }}</span>
-              <span class="mono text-accent" style="font-size:11px">{{ val }}</span>
-            </div>
-            {% endfor %}
+        </div>
+        <div class="card bg-dark bg-gradient border-secondary text-white mt-4">
+          <div class="card-body">
+            <h2 class="h5">Training pipeline</h2>
+            <ol class="text-muted small mb-0">
+              <li>Load and clean dataset</li>
+              <li>Label zones using radiance thresholds</li>
+              <li>Build feature matrix and scale values</li>
+              <li>Train Gradient Boosting classifier</li>
+            </ol>
           </div>
-
-          <div class="section-title mt-3">Algoritmos evaluados</div>
-          {% set algos = [
-            ('Gradient Boosting',  100, '#00d4ff', True),
-            ('Random Forest',       97, '#00FF80', False),
-            ('SVM',                 91, '#FFB300', False),
-            ('KNN',                 88, '#0040FF', False),
-          ] %}
-          {% for name, score, color, best in algos %}
-          <div class="d-flex align-items-center gap-2 mb-2">
-            <span style="font-size:10px;width:130px;color:{% if best %}var(--text){% else %}var(--text-dim){% endif %}">
-              {% if best %}★ {% endif %}{{ name }}
-            </span>
-            <div style="flex:1;height:5px;background:var(--bg2);border-radius:3px;overflow:hidden">
-              <div style="width:{{ score }}%;height:100%;background:{{ color }};border-radius:3px"></div>
-            </div>
-            <span class="mono" style="font-size:10px;color:{{ color }};width:36px;text-align:right">{{ score }}%</span>
-          </div>
-          {% endfor %}
         </div>
       </div>
-
-      <!-- Pipeline de entrenamiento -->
-      <div class="panel">
-        <div class="panel-header">
-          <div class="panel-icon" style="background:rgba(0,255,128,.08)">🔄</div>
-          <div class="panel-title">Pipeline de Entrenamiento</div>
-        </div>
-        <div class="panel-body">
-          {% set steps = [
-            ('1', 'Carga del CSV', 'load_dataset()', 'Parseo GeoJSON → lat/lon'),
-            ('2', 'Etiquetado',    'label_zone()',    'Umbrales Bortle → 6 clases'),
-            ('3', 'Features',      'build_features()','6 variables derivadas'),
-            ('4', 'Escalado',      'StandardScaler()', 'Normalización Z-score'),
-            ('5', 'Split',         'train_test_split()','80% train · 20% test'),
-            ('6', 'Fit',           'clf.fit(X_train)','200 estimadores · depth=5'),
-          ] %}
-          {% for num, title, fn, desc in steps %}
-          <div class="d-flex gap-3 mb-3">
-            <div style="
-              width:24px;height:24px;border-radius:6px;
-              border:1px solid var(--accent);
-              color:var(--accent);
-              font-size:10px;font-weight:700;
-              display:grid;place-items:center;flex-shrink:0;
-            ">{{ num }}</div>
-            <div>
-              <div style="font-size:11px;color:var(--text);font-weight:600">{{ title }}</div>
-              <div class="mono" style="font-size:10px;color:var(--accent)">{{ fn }}</div>
-              <div style="font-size:10px;color:var(--text-muted)">{{ desc }}</div>
-            </div>
-          </div>
-          {% endfor %}
-        </div>
-      </div>
-
-    </div><!-- /col izquierda -->
-
-    <!-- COL DERECHA -->
-    <div class="col-lg-7">
-
-      <!-- Importancia de features -->
-      <div class="panel mb-4">
-        <div class="panel-header">
-          <div class="panel-icon" style="background:rgba(255,179,0,.08)">📊</div>
-          <div class="panel-title">Importancia de Features</div>
-        </div>
-        <div class="panel-body">
-          <p class="text-dim mb-3" style="font-size:11px">
-            Contribución de cada variable al modelo (Gradient Boosting feature importance).
-          </p>
-          {% for feat in feature_importance %}
-          <div class="mb-3">
-            <div class="d-flex justify-content-between mb-1">
-              <span class="mono" style="font-size:11px;color:var(--text)">{{ feat.name }}</span>
-              <span class="mono text-accent" style="font-size:11px">{{ feat.pct }}%</span>
-            </div>
-            <div style="height:6px;background:var(--bg2);border-radius:3px;overflow:hidden">
-              <div style="
-                width:{{ feat.pct }}%;height:100%;
-                background:linear-gradient(90deg,var(--accent2),var(--accent));
-                border-radius:3px;
-              "></div>
-            </div>
-            <div style="font-size:10px;color:var(--text-muted);margin-top:3px">{{ feat.desc }}</div>
-          </div>
-          {% endfor %}
-        </div>
-      </div>
-
-      <!-- Matriz de clases -->
-      <div class="panel mb-4">
-        <div class="panel-header">
-          <div class="panel-icon" style="background:rgba(0,100,255,.1)">🎯</div>
-          <div class="panel-title">Distribución de Clases · Train vs Test</div>
-        </div>
-        <div class="panel-body">
-          <div class="row g-2">
-            {% for z in zone_summary %}
-            <div class="col-md-6">
-              <div class="zone-legend-item">
-                <div class="zone-dot" style="background:{{ z.color }};box-shadow:0 0 6px {{ z.color }}88"></div>
-                <div style="flex:1;min-width:0">
-                  <div class="zone-name" style="font-size:10px">{{ z.name }}</div>
-                  <div class="zone-bar" style="width:{{ [z.pct*2,100]|min }}%;background:{{ z.color }}44;border-left:2px solid {{ z.color }}"></div>
-                </div>
-                <div style="text-align:right">
-                  <div class="zone-pct" style="color:{{ z.color }}">{{ z.count }} pts</div>
-                  <div style="font-size:9px;color:var(--text-muted)">{{ z.pct }}%</div>
-                </div>
-              </div>
+      <div class="col-lg-7">
+        <div class="card bg-black border-secondary text-white">
+          <div class="card-body">
+            <h2 class="h5">Feature importance</h2>
+            {% for feat in feature_importance %}
+            <div class="mb-3">
+              <div class="d-flex justify-content-between"><span>{{ feat.name }}</span><strong>{{ feat.pct }}%</strong></div>
+              <div class="progress" style="height:8px;"><div class="progress-bar bg-info" role="progressbar" style="width: {{ feat.pct }}%;"></div></div>
+              <div class="text-muted small mt-1">{{ feat.desc }}</div>
             </div>
             {% endfor %}
           </div>
         </div>
       </div>
-
-      <!-- Detalles técnicos del modelo -->
-      <div class="panel">
-        <div class="panel-header">
-          <div class="panel-icon" style="background:rgba(0,212,255,.06)">🔧</div>
-          <div class="panel-title">Detalles Técnicos · model.py</div>
-        </div>
-        <div class="panel-body">
-          <p class="text-dim mb-3" style="font-size:11px;line-height:1.7">
-            El modelo está encapsulado en la clase <span class="mono text-accent">LightPollutionClassifier</span>
-            dentro de <span class="mono text-accent">model.py</span>, separada de la lógica Flask en
-            <span class="mono text-accent">app.py</span>, siguiendo principios de separación de responsabilidades.
-          </p>
-          <div class="row g-2" style="font-size:11px">
-            {% for method, desc in model_info.methods.items() %}
-            <div class="col-12">
-              <div class="d-flex gap-3 p-2" style="background:var(--bg2);border-radius:6px;border:1px solid var(--border)">
-                <span class="mono text-accent" style="flex-shrink:0;font-size:10px">{{ method }}</span>
-                <span class="text-dim" style="font-size:10px">{{ desc }}</span>
-              </div>
-            </div>
-            {% endfor %}
-          </div>
-        </div>
-      </div>
-
-    </div><!-- /col derecha -->
-  </div>
-</div>
-
-<!-- ── NAV ENTRE FASES ── -->
-<div class="container mb-5" style="position:relative;z-index:1">
-  <div class="d-flex justify-content-between align-items-center">
-    <a href="{{ url_for('fase1') }}" class="btn-demo" style="width:auto;padding:.6rem 1.4rem;text-decoration:none">
-      ← Fase 1 · Datos
-    </a>
-    <span class="text-dim" style="font-size:11px">Fase 2 de 3 · CRISP-DM</span>
-    <a href="{{ url_for('fase3') }}" class="btn-predict" style="width:auto;padding:.6rem 1.6rem;text-decoration:none">
-      Fase 3 · Evaluación →
-    </a>
-  </div>
-</div>
-
-<!-- ── FOOTER ── -->
-<footer>
-  <div class="container">
-    <p><span>LightScan</span> · Fase 2 · Modelado ML · <span>Francisc v / Joan Moreno</span></p>
-  </div>
-</footer>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    </div>
+    <div class="d-flex justify-content-between align-items-center mt-5">
+      <a href="{{ url_for('business') }}" class="btn btn-outline-info">← Phase 1</a>
+      <a href="{{ url_for('fase3') }}" class="btn btn-info text-dark">Phase 3 · Evaluation →</a>
+    </div>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

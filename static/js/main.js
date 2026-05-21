@@ -104,10 +104,13 @@ function loadMapData() {
 }
 
 // ── FORMULARIO DE PREDICCIÓN ──
-document.getElementById('predict-form').addEventListener('submit', function(e) {
-  e.preventDefault();
-  runPrediction();
-});
+const predictForm = document.getElementById('predict-form');
+if (predictForm) {
+  predictForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    runPrediction();
+  });
+}
 
 function runPrediction() {
   const lat    = parseFloat(document.getElementById('inp-lat').value);
@@ -244,14 +247,17 @@ function updateMapWithPoint(data) {
 
 // ── BOTÓN DEMO ──
 let demoIndex = 0;
-document.getElementById('btn-demo').addEventListener('click', function() {
-  const pt = DEMO_POINTS[demoIndex % DEMO_POINTS.length];
-  demoIndex++;
-  document.getElementById('inp-lat').value = pt.lat;
-  document.getElementById('inp-lon').value = pt.lon;
-  document.getElementById('inp-rad').value = pt.avg_rad;
-  showToast(`🛰️ Demo: ${pt.label}`);
-});
+const demoButton = document.getElementById('btn-demo');
+if (demoButton) {
+  demoButton.addEventListener('click', function() {
+    const pt = DEMO_POINTS[demoIndex % DEMO_POINTS.length];
+    demoIndex++;
+    document.getElementById('inp-lat').value = pt.lat;
+    document.getElementById('inp-lon').value = pt.lon;
+    document.getElementById('inp-rad').value = pt.avg_rad;
+    showToast(`🛰️ Demo: ${pt.label}`);
+  });
+}
 
 // ── UI HELPERS ──
 function showSpinner(visible) {
@@ -335,8 +341,9 @@ function showToast(msg) {
   });
 })();
 document.addEventListener('DOMContentLoaded', function() {
-  // Inicializar mapa con pequeño delay para layout
-  setTimeout(initMap, 200);
+  if (document.getElementById('map')) {
+    setTimeout(initMap, 200);
+  }
 
   // Animación de entrada de stat cards
   const cards = document.querySelectorAll('.stat-card');

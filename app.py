@@ -4,6 +4,7 @@
 #  JoanMoreno · Cundinamarca VIIRS / SUOMI-NPP
 # ══════════════════════════════════════════════════════════════
 
+import os
 import io
 import base64
 import numpy as np
@@ -273,9 +274,35 @@ def fase2():
     )
 
 
+@app.route("/methodology")
+def methodology():
+    """CRISP-ML methodology overview."""
+    return render_template(
+        "methodology.html",
+        stats=classifier.get_stats(),
+        zone_summary=classifier.get_zone_summary(),
+        heatmap_b64=_render_heatmap(classifier.get_full_dataframe()),
+    )
+
+
+@app.route("/business")
+def business():
+    return fase1()
+
+
+@app.route("/data-understanding")
+def data_understanding():
+    return fase1()
+
+
+@app.route("/data-engineering")
+def data_engineering():
+    return fase2()
+
+
 @app.route("/fase3")
 def fase3():
-    """CRISP-DM Fase 3 · Evaluación & Despliegue"""
+    """CRISP-DM Phase 3 · Evaluation & Deployment"""
     return render_template(
         "fase3_evaluacion.html",
         stats=classifier.get_stats(),
@@ -288,4 +315,5 @@ def fase3():
 # ENTRY POINT
 # ─────────────────────────────────────────
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)
