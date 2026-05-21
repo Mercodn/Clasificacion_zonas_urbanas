@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LightScan · Night Light Pollution Classification</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+</head>
+<body>
+  {% include 'navbar.html' %}
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-tag">Open Satellite Data · Cundinamarca, Colombia</div>
+      <h1>Night Light Pollution<br><span>Classification</span></h1>
+      <p class="hero-sub">Machine Learning with VIIRS data · Real-time prediction · CRISP-ML navigation</p>
+    </div>
+  </section>
+
+  <div class="container mb-4" style="position:relative;z-index:1">
+    <div class="row g-3">
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-val">{{ stats.total_points }}</div>
+          <div class="stat-lbl">Satellite observations</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-val text-accent">{{ stats.accuracy }}%</div>
+          <div class="stat-lbl">Model accuracy</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-val" style="font-size:1.4rem">{{ stats.max_rad }}</div>
+          <div class="stat-lbl">Max radiance</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-val" style="font-size:1.4rem">6</div>
+          <div class="stat-lbl">Zone classes</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container mb-5" style="position:relative;z-index:1">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="panel mb-4">
+          <div class="panel-header">
+            <div class="panel-icon" style="background:rgba(0,212,255,.1)"></div>
+            <div class="panel-title">Analyze a Coordinate</div>
+          </div>
+          <div class="panel-body">
+            <p class="text-dim mb-3" style="font-size:11px;line-height:1.7">
+              Enter latitude, longitude, and average VIIRS radiance to classify a point in Cundinamarca.
+              You can also click on the map to fill the coordinates automatically.
+            </p>
+            <form id="predict-form">
+              <div class="mb-3">
+                <label class="form-label">Latitude</label>
+                <input type="number" id="inp-lat" class="form-control" placeholder="4.7110" step="0.0001" min="3.6" max="5.9" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Longitude</label>
+                <input type="number" id="inp-lon" class="form-control" placeholder="-74.0721" step="0.0001" min="-75.0" max="-72.9" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Average radiance <span class="text-dim">(nW/cm²/sr)</span></label>
+                <input type="number" id="inp-rad" class="form-control" placeholder="e.g. 3.45" step="0.0001" min="0" max="500" required>
+              </div>
+              <div class="d-grid gap-2">
+                <button type="submit" id="btn-submit" class="btn-predict">▶ Classify Zone</button>
+                <button type="button" id="btn-demo" class="btn-demo">↻ Load demo point</button>
+              </div>
+            </form>
+            <div id="error-msg" class="alert-err mt-3"></div>
+            <div id="spinner-wrap" class="spinner-wrap mt-3">
+              <div class="spinner"></div>
+              Processing prediction...
+            </div>
+          </div>
+        </div>
+
+        <div id="result-panel" class="panel">
+          <div class="panel-header">
+            <div class="panel-icon" style="background:rgba(0,255,128,.08)"></div>
+            <div class="panel-title">Classification Result</div>
+          </div>
+          <div class="panel-body">
+            <div id="res-badge"></div>
+            <div id="res-coords" class="result-coord mono"></div>
+            <div id="res-desc" class="result-desc"></div>
+            <div class="section-title mt-3">Model confidence</div>
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span style="font-size:10px;color:var(--text-muted)">Predicted class probability</span>
+              <span id="res-conf-val" class="text-accent mono" style="font-size:11px;font-weight:700"></span>
+            </div>
+            <div class="confidence-bar mb-3">
+              <div id="res-conf-fill" class="confidence-fill" style="width:0%"></div>
+            </div>
+            <div class="section-title">Class distribution</div>
+            <div id="res-probs"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-8">
+        <div class="panel mb-4">
+          <div class="panel-header">
+            <div class="panel-icon" style="background:rgba(255,80,0,.08)"></div>
+            <div class="panel-title">VIIRS Heatmap</div>
+            <span class="ms-auto text-dim" style="font-size:10px;letter-spacing:.05em">log(nW/cm²/sr)</span>
+          </div>
+          <div class="panel-body p-0">
+            <div class="heatmap-container">
+              <img id="heatmap-img" src="data:image/png;base64,{{ heatmap_b64 }}" alt="Night light pollution heatmap in Cundinamarca">
+            </div>
+          </div>
+        </div>
+
+        <div class="panel mb-4">
+          <div class="panel-header">
+            <div class="panel-icon" style="background:rgba(0,100,255,.1)">🗺</div>
+            <div class="panel-title">Interactive Map</div>
+          </div>
+          <div class="panel-body p-2">
+            <div id="map"></div>
+            <p class="text-dim mt-2 mb-0" style="font-size:10px;letter-spacing:.04em">
+              Click on the map to fill latitude and longitude in the form. Colors show the predicted zones.
+            </p>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-icon" style="background:rgba(255,255,0,.07)"></div>
+            <div class="panel-title">Zone classification</div>
+            <span class="ms-auto text-dim" style="font-size:10px">{{ stats.total_points }} points</span>
+          </div>
+          <div class="panel-body">
+            <div class="row g-2">
+              {% for z in zone_summary %}
+              <div class="col-md-6">
+                <div class="zone-legend-item">
+                  <div class="zone-dot" style="background:{{ z.color }};box-shadow:0 0 6px {{ z.color }}88"></div>
+                  <div style="flex:1;min-width:0">
+                    <div class="zone-name">{{ z.name }}</div>
+                    <div class="zone-bar" style="width:{{ [z.pct * 2, 100]|min }}%;background:{{ z.color }}55;border-left:2px solid {{ z.color }}"></div>
+                  </div>
+                  <div style="text-align:right">
+                    <div class="zone-pct" style="color:{{ z.color }}">{{ z.pct }}%</div>
+                    <div style="font-size:9px;color:var(--text-muted)">{{ z.count }} pts</div>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+            <div class="mt-4 p-3" style="background:var(--bg2);border-radius:8px;border:1px solid var(--border)">
+              <div class="section-title mb-2">Model details</div>
+              <div class="row g-2" style="font-size:11px;color:var(--text-dim)">
+                <div class="col-6 col-md-4">
+                  <span class="text-muted d-block" style="font-size:9px;letter-spacing:.1em;text-transform:uppercase">Algorithm</span>
+                  <span class="text-accent mono">GradientBoosting</span>
+                </div>
+                <div class="col-6 col-md-4">
+                  <span class="text-muted d-block" style="font-size:9px;letter-spacing:.1em;text-transform:uppercase">Estimators</span>
+                  <span class="mono" style="color:var(--text)">200 trees</span>
+                </div>
+                <div class="col-6 col-md-4">
+                  <span class="text-muted d-block" style="font-size:9px;letter-spacing:.1em;text-transform:uppercase">Features</span>
+                  <span class="mono" style="color:var(--text)">6 variables</span>
+                </div>
+                <div class="col-6 col-md-4">
+                  <span class="text-muted d-block" style="font-size:9px;letter-spacing:.1em;text-transform:uppercase">Accuracy</span>
+                  <span class="text-accent mono">{{ stats.accuracy }}%</span>
+                </div>
+                <div class="col-6 col-md-4">
+                  <span class="text-muted d-block" style="font-size:9px;letter-spacing:.1em;text-transform:uppercase">Satellite</span>
+                  <span class="mono" style="color:var(--text)">VIIRS/SUOMI-NPP</span>
+                </div>
+                <div class="col-6 col-md-4">
+                  <span class="text-muted d-block" style="font-size:9px;letter-spacing:.1em;text-transform:uppercase">Region</span>
+                  <span class="mono" style="color:var(--text)">Cundinamarca, CO</span>
+                </div>
+              </div>
+              <div class="mt-3" style="font-size:10px;color:var(--text-muted);line-height:1.7">
+                Features used: <span class="text-accent">avg_rad</span>, <span class="text-accent">log(avg_rad)</span>, <span class="text-accent">lat</span>, <span class="text-accent">lon</span>, <span class="text-accent">dist_bogota</span>, <span class="text-accent">rad²</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">
+      <p>
+        <span>LightScan</span> · Urban zone classification by nighttime light pollution using open satellite data.
+      </p>
+      <p class="mt-1" style="color:var(--border2)">
+        Data: NASA VIIRS / SUOMI-NPP · Region: Cundinamarca, Colombia · Model: Gradient Boosting · scikit-learn
+      </p>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

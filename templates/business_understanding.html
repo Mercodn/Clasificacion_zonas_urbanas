@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LightScan · Business Understanding</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+  {% include 'navbar.html' %}
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-tag">Phase 1 · Business Understanding</div>
+      <h1>Business Understanding</h1>
+      <p class="hero-sub">Define the problem, objectives, questions, feasibility, and expected impact.</p>
+    </div>
+  </section>
+
+  <div class="container py-5">
+    <div class="row g-4">
+      <div class="col-lg-8 mx-auto">
+        <div class="panel mb-4">
+          <div class="panel-header"><div class="panel-title">Problem Context</div></div>
+          <div class="panel-body">
+            <p>Nighttime light pollution is an environmental challenge that affects ecosystems, human health, and energy consumption. In Cundinamarca, Colombia, urban growth around Bogotá, Soacha, and Zipaquirá creates strong spatial differences in artificial lighting.</p>
+            <p>This project uses VIIRS satellite data to analyze and classify areas with low, medium, and high nighttime illumination, supporting planners and decision-makers with geographic evidence.</p>
+          </div>
+        </div>
+
+        <div class="panel mb-4">
+          <div class="panel-header"><div class="panel-title">Business Objectives</div></div>
+          <div class="panel-body">
+            <ul>
+              <li>Identify light pollution zones in Cundinamarca.</li>
+              <li>Provide actionable insights for environmental planning.</li>
+              <li>Support energy efficiency and lighting policy decisions.</li>
+              <li>Deliver a public interface with CRISP-ML documentation.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="panel mb-4">
+          <div class="panel-header"><div class="panel-title">Key Questions</div></div>
+          <div class="panel-body">
+            <ol>
+              <li>Which locations show the highest levels of nighttime radiance?</li>
+              <li>How is light pollution distributed geographically?</li>
+              <li>Can VIIRS radiance values classify pollution levels reliably?</li>
+              <li>Which areas are suitable for targeted mitigation?</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="panel mb-4">
+          <div class="panel-header"><div class="panel-title">Feasibility and Risks</div></div>
+          <div class="panel-body">
+            <p>The project is feasible with standard Python tools and open satellite data. It does not require specialized hardware and can be deployed with Flask.</p>
+            <p>Key risks and limitations include:</p>
+            <ul>
+              <li>Limited spatial resolution of VIIRS (~750 m).</li>
+              <li>Annual composites do not capture seasonal variation.</li>
+              <li>Proxy conversion for the balanced dataset may introduce approximation errors.</li>
+              <li>Lack of direct ground-truth light pollution measurements.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Expected Impact</div></div>
+          <div class="panel-body">
+            <p>This solution is designed to support environmental agencies, regional planners, and researchers by providing a clear view of nighttime light pollution patterns. It offers a reproducible workflow and an accessible web interface for the first CRISP-ML phases.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container text-center py-4" style="color:var(--text-muted);font-size:.9rem">
+      LightScan · Business Understanding
+    </div>
+  </footer>
+</body>
+</html>
