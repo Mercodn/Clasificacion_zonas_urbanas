@@ -4,17 +4,19 @@ A CRISP-ML machine learning project to analyze and classify nighttime light poll
 
 ## Project Structure
 
-- `app.py` — Flask application with English navigation and CRISP-ML pages.
+- `app.py` — Flask application with English navigation, CRISP-ML pages, and API endpoints.
 - `model.py` — Dataset loading, preprocessing, feature engineering, and classification.
 - `scripts/preprocess_balanced.py` — Converts the balanced polygon dataset into point-level data and merges it with VIIRS observations.
 - `data.csv` — Original VIIRS dataset.
 - `data_prepared.csv` — Prepared dataset used by the model.
 - `templates/` — HTML pages for Home, Methodology, Business Understanding, Data Understanding, and Data Engineering.
 - `docs/` — English project documentation for the first CRISP-ML phases.
+- `Procfile` — Render startup configuration.
+- `.gitignore` — Ignored files to keep the repository clean.
 
 ## Requirements
 
-Create and activate a Python virtual environment, then install dependencies from `requirements.txt`.
+Create and activate the Python virtual environment, then install dependencies from `requirements.txt`.
 
 ```bash
 python -m venv .venv_local
@@ -24,16 +26,24 @@ pip install -r requirements.txt
 
 ## Run locally
 
-If you are on Windows, use the included batch file:
+Use the included batch file on Windows:
 
 ```bat
 cd "C:\Users\Leo\Documents\ML PROYECTO\Clasificacion_zonas_urbanas"
 run.bat
 ```
 
-The script will create `.venv_local` and install dependencies if needed, then start the app.
+This will start the app locally on `http://127.0.0.1:5000`.
 
-Then visit `http://127.0.0.1:5000`.
+## Deploy to Render
+
+This repository is ready for Render deployment.
+
+- `Procfile` launches the web process with `gunicorn app:app`.
+- `requirements.txt` lists all Python dependencies.
+- Render will set the `PORT` environment variable automatically.
+
+If you deploy manually, choose a Python web service and use the default branch.
 
 ## Flask pages
 
@@ -45,4 +55,4 @@ Then visit `http://127.0.0.1:5000`.
 
 ## Notes
 
-This project is designed to support the first stages of a machine learning project: business understanding, data understanding, and data engineering.
+The project is configured for immediate Render deployment and local development using `.venv_local`.
