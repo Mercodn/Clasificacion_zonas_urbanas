@@ -11,48 +11,49 @@
   {% include 'navbar.html' %}
   <main class="container mt-5">
     <div class="mb-4">
-      <span class="badge bg-info text-dark mb-2">CRISP-ML · Fase 3</span>
+      <span class="badge bg-info text-dark mb-2">CRISP-ML · Phase 3</span>
       <h1>Evaluation & Deployment</h1>
-      <p class="lead text-muted">Evaluar el rendimiento del modelo y mostrar los resultados con visualizaciones interpretables.</p>
+      <p class="lead text-muted">Evaluate model performance and showcase results with interpretable visualizations.</p>
     </div>
     <div class="row gy-4">
       <div class="col-lg-5">
         <div class="card bg-dark bg-gradient border-secondary text-white h-100">
           <div class="card-body">
-            <h2 class="h5">Resumen de desempeño</h2>
+            <h2 class="h5">Performance Summary</h2>
             <ul class="text-muted">
               <li>Accuracy: {{ stats.accuracy }}%</li>
-              <li>Puntos evaluados: {{ stats.total_points }}</li>
-              <li>Modelo: Gradient Boosting Classifier</li>
+              <li>Total Points Evaluated: {{ stats.total_points }}</li>
+              <li>Model: Gradient Boosting Classifier</li>
             </ul>
           </div>
         </div>
         <div class="card bg-dark bg-gradient border-secondary text-white mt-4">
           <div class="card-body">
-            <h2 class="h5">API de predicción</h2>
+            <h2 class="h5">Prediction API</h2>
             <p class="text-muted small mb-2">POST /predict</p>
-            <p class="text-muted">Envía JSON con lat, lon y avg_rad para obtener zona, confianza y probabilidades.</p>
+            <p class="text-muted">Send JSON with lat, lon, and avg_rad to receive zone prediction, confidence score, and probabilities.</p>
           </div>
         </div>
       </div>
       <div class="col-lg-7">
         <div class="card bg-black border-secondary text-white mb-4">
           <div class="card-body">
-            <h2 class="h5">Curva ROC multi-clase</h2>
-            <p class="text-muted">El ROC muestra la capacidad del clasificador para discriminar entre las seis zonas.</p>
-            <img class="img-fluid rounded" src="data:image/png;base64,{{ roc_curve_b64 }}" alt="Curva ROC multi-clase">
+            <h2 class="h5">ROC Curve Analysis</h2>
+            <p class="text-muted">Multi-class ROC demonstrates the classifier's ability to discriminate between all six light pollution zones.</p>
+            <img class="img-fluid rounded" src="data:image/png;base64,{{ roc_curve_b64 }}" alt="Multi-class ROC Curve">
           </div>
         </div>
         <div class="card bg-black border-secondary text-white">
           <div class="card-body">
-            <h2 class="h5">Mapa de resultados</h2>
+            <h2 class="h5">Results Heatmap</h2>
+            <p class="text-muted">Spatial distribution of predicted zones across Cundinamarca.</p>
             <img class="img-fluid rounded" src="data:image/png;base64,{{ heatmap_b64 }}" alt="Heatmap result">
           </div>
         </div>
       </div>
     </div>
     <div class="d-flex justify-content-between align-items-center mt-5">
-      <a href="{{ url_for('data_engineering') }}" class="btn btn-outline-info">← Phase 2</a>
+      <a href="{{ url_for('data_engineering') }}" class="btn btn-outline-info">← Data Engineering</a>
       <a href="{{ url_for('index') }}" class="btn btn-info text-dark">Home</a>
     </div>
   </main>
