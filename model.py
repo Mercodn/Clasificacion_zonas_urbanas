@@ -17,12 +17,12 @@ from sklearn.model_selection import train_test_split
 # ─────────────────────────────────────────
 
 ZONE_NAMES = {
-    0: "Oscuro Natural",
-    1: "Rural Bajo",
-    2: "Suburbano",
-    3: "Urbano Moderado",
-    4: "Urbano Alto",
-    5: "Metropolitano"
+    0: "Pristine Natural",
+    1: "Rural Low",
+    2: "Suburban",
+    3: "Urban Moderate",
+    4: "Urban High",
+    5: "Metropolitan"
 }
 
 ZONE_COLORS = {
@@ -35,12 +35,12 @@ ZONE_COLORS = {
 }
 
 ZONE_DESC = {
-    0: "Cielo casi prístino. Mínima interferencia lumínica. Ideal para astronomía.",
-    1: "Zona rural con baja densidad. Contaminación lumínica muy leve.",
-    2: "Periferia urbana. Visible el brillo en el horizonte desde la ciudad.",
-    3: "Zona residencial o industrial moderada. Estrellas limitadas.",
-    4: "Centro urbano denso. Cielo naranja. Alta contaminación lumínica.",
-    5: "Núcleo metropolitano. Radiancia extrema. Cielo completamente brillante."
+    0: "Nearly pristine sky. Minimal light interference. Ideal for astronomy.",
+    1: "Rural area with low density. Very light pollution.",
+    2: "Urban periphery. City glow visible on the horizon.",
+    3: "Moderate residential or industrial area. Limited visible stars.",
+    4: "Dense urban center. Orange sky. High light pollution.",
+    5: "Metropolitan core. Extreme radiance. Completely bright sky."
 }
 
 # Coordenadas de referencia — centroide Bogotá

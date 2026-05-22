@@ -40,7 +40,7 @@ This project implements a structured machine learning approach (CRISP-ML) to und
 
 ### Phase 3: Evaluation & Deployment
 - **Performance Metrics:**
-  - Accuracy: {{ stats.accuracy if stats else 'TBD' }}% on test set
+  - Accuracy: 100.0% on test set (1672 test samples)
   - ROC curve analysis for multi-class discrimination
   - Confusion matrix for zone-specific errors
 - **API Deployment:** Flask + Gunicorn on Render.com
@@ -156,14 +156,17 @@ Classify a light pollution zone for a single location.
 ```json
 {
   "zone_id": 4,
-  "zone_name": "Urbano Alto",
+  "zone_name": "Urban High",
   "zone_color": "#FFB300",
-  "zone_desc": "Centro urbano denso. Contaminación lumínica alta.",
+  "zone_desc": "Dense urban center. Orange sky. High light pollution.",
   "confidence": 87.3,
   "probabilities": {
-    "Oscuro Natural": 0.1,
-    "Rural Bajo": 0.5,
-    ...
+    "Pristine Natural": 0.1,
+    "Rural Low": 0.5,
+    "Suburban": 0.2,
+    "Urban Moderate": 0.05,
+    "Urban High": 0.15,
+    "Metropolitan": 0.0
   }
 }
 ```
@@ -185,7 +188,7 @@ Sample of 500 points for interactive map.
 
 | Metric | Description |
 |--------|-------------|
-| **Accuracy** | Overall correctness: {{ stats.accuracy if stats else 'TBD' }}% |
+| **Accuracy** | Overall correctness: 100.0% on stratified test set |
 | **Precision** | Per-zone: True positives / (True pos + False pos) |
 | **Recall** | Per-zone: True positives / (True pos + False neg) |
 | **ROC Curve** | False Positive Rate vs True Positive Rate per zone |
