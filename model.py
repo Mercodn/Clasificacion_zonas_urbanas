@@ -145,6 +145,8 @@ class LightPollutionClassifier:
         self.accuracy  = 0.0
         self.df        = None          # dataset completo con predicciones
         self._trained  = False
+        self.y_test    = None          # para ROC curve
+        self.y_proba_test = None       # para ROC curve
 
     # ── ENTRENAMIENTO ──────────────────────
 
@@ -177,6 +179,10 @@ class LightPollutionClassifier:
         # 5. Evaluar
         y_pred = self.clf.predict(X_test)
         self.accuracy = float((y_pred == y_test).mean())
+        
+        # Store test data for ROC curve
+        self.y_test = y_test
+        self.y_proba_test = self.clf.predict_proba(X_test)
 
         # 6. Predicción sobre todo el dataset
         df["pred_zone"]  = self.clf.predict(X_scaled)
