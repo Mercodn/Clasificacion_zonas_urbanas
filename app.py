@@ -299,7 +299,8 @@ def api_stats():
     return jsonify({
         "accuracy": stats["accuracy"],
         "total":    stats["total_points"],
-        "model":    "Gradient Boosting Classifier",
+        "model":    stats["model_name"],
+        "best_model": stats["model_name"],
         "features": LightPollutionClassifier.FEATURE_NAMES,
         "zones": {
             str(z): {
@@ -325,35 +326,21 @@ def fase1():
 @app.route("/fase2")
 def fase2():
     """CRISP-DM Fase 2 · Modelado ML"""
-    importances = classifier.clf.feature_importances_
-    feat_data = [
-        {"name": "avg_rad",     "pct": 0,  "desc": "Radiancia promedio VIIRS bruta"},
-        {"name": "log_rad",     "pct": 0,  "desc": "log(1 + avg_rad) · reduce sesgo outliers"},
-        {"name": "dist_bogota", "pct": 0,  "desc": "Distancia al centroide de Bogotá"},
-        {"name": "rad_sq",      "pct": 0,  "desc": "Radiancia al cuadrado · captura extremos"},
-        {"name": "lat",         "pct": 0,  "desc": "Latitud decimal del punto"},
-        {"name": "lon",         "pct": 0,  "desc": "Longitud decimal del punto"},
-    ]
-    for i, feat in enumerate(feat_data):
-        feat["pct"] = round(float(importances[i]) * 100, 1)
-    feat_data.sort(key=lambda x: x["pct"], reverse=True)
+    feat_data = classifier.get_feature_importance()
 
+    best_model = classifier.get_best_model_info()
     model_info = {
         "accuracy": classifier.get_stats()["accuracy"],
-        "params": {
-            "n_estimators":  200,
-            "learning_rate": 0.1,
-            "max_depth":     5,
-            "random_state":  42,
-            "test_size":     "20%",
-            "stratify":      "True",
-        },
+        "name":     classifier.best_model_name,
+        "description": best_model.get("description", ""),
+        "params":  best_model.get("params", {}),
         "methods": {
-            "train()":          "Carga CSV, etiqueta zonas, entrena el modelo",
-            "predict()":        "Clasifica un punto → zona + confianza + probabilidades",
-            "get_stats()":      "Retorna métricas globales del dataset y el modelo",
-            "get_zone_summary()": "Lista de zonas con conteo y porcentaje",
-            "get_map_sample()": "Muestra de 500 puntos para el mapa Leaflet",
+            "train()":             "Carga CSV, etiqueta zonas, entrena los modelos comparativos",
+            "predict()":           "Clasifica un punto → zona + confianza + probabilidades con el mejor modelo",
+            "get_stats()":         "Retorna métricas globales del dataset y el modelo seleccionado",
+            "get_zone_summary()":  "Lista de zonas con conteo y porcentaje",
+            "get_map_sample()":    "Muestra de 500 puntos para el mapa Leaflet",
+            "get_model_comparison()": "Retorna la comparación entre los 3 modelos entrenados",
         },
     }
 
@@ -390,6 +377,22 @@ def data_understanding():
 @app.route("/data-engineering")
 def data_engineering():
     return fase2()
+
+
+@app.route("/model-engineering")
+@app.route("/model-development")
+def model_engineering():
+    return render_template(
+        "model_engineering.html",
+        stats=classifier.get_stats(),
+        zone_summary=classifier.get_zone_summary(),
+        model_reports=classifier.get_model_comparison(),
+        best_model=classifier.get_best_model_info(),
+        best_model_name=classifier.best_model_name,
+        heatmap_b64=_render_heatmap(classifier.get_full_dataframe()),
+        roc_curve_b64=_render_roc_curve(classifier),
+        feature_importance=classifier.get_feature_importance(),
+    )
 
 
 @app.route("/evaluation")

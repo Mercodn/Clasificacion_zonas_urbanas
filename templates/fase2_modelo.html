@@ -60,10 +60,7 @@
           <div class="card-body">
             <h2 class="h5">Model Configuration</h2>
             <ul class="text-muted small">
-              <li><strong>Algorithm:</strong> Gradient Boosting Classifier</li>
-              <li><strong>Estimators:</strong> 200</li>
-              <li><strong>Learning Rate:</strong> 0.1</li>
-              <li><strong>Max Depth:</strong> 5</li>
+              <li><strong>Selected Model:</strong> {{ model_info.name }}</li>
               <li><strong>Train/Test Split:</strong> 80/20 (stratified)</li>
               <li><strong>Test Accuracy:</strong> {{ stats.accuracy }}%</li>
             </ul>

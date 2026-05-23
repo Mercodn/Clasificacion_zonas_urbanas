@@ -1,5 +1,7 @@
 # LightScan — Night Light Pollution Classification
 
+Repository: https://github.com/Mercodn/Clasificacion_zonas_urbanas
+
 A CRISP-ML machine learning project to analyze and classify nighttime light pollution levels in Cundinamarca, Colombia using VIIRS/SUOMI-NPP satellite data.
 
 ## Project Overview
@@ -35,7 +37,7 @@ This project implements a structured machine learning approach (CRISP-ML) to und
   - Zone 3: 1.00–5.00 (Urban Moderate)
   - Zone 4: 5.00–20.0 (Urban High)
   - Zone 5: ≥ 20.0 (Metropolitan)
-- **Model:** Gradient Boosting Classifier (200 estimators, lr=0.1, depth=5)
+- **Models:** Gradient Boosting, Random Forest, Logistic Regression
 - **Validation:** 80/20 stratified train/test split
 
 ### Phase 3: Evaluation & Deployment
@@ -136,6 +138,7 @@ The application will be available at your Render public URL.
 | Business Understanding | `/business` | Phase 1 | Problem, objectives, feasibility, risks, impact |
 | Data Understanding | `/data-understanding` | Phase 1 | EDA, statistics, data quality, distributions |
 | Data Engineering | `/data-engineering` | Phase 2 | Feature engineering, transformations, model config |
+| Model Engineering | `/model-engineering` | Phase 2 | Multi-model comparison, training diagnostics, prediction examples |
 | Evaluation | `/evaluation` | Phase 3 | ROC curve, performance metrics, heatmap |
 
 ## API Endpoints
@@ -203,6 +206,7 @@ Sample of 500 points for interactive map.
 - **Frontend:** Bootstrap 5.3, HTML5, CSS3
 - **Deployment:** Render.com, Gunicorn
 - **Version Control:** GitHub
+- **ML Models:** Gradient Boosting, Random Forest, Logistic Regression
 
 ## Documentation
 
@@ -210,6 +214,7 @@ Additional documentation available in:
 - `docs/data_preparation.md` — Detailed preprocessing workflow
 - Flask pages — Interactive CRISP-ML journey through the project
 - Inline code comments — Implementation details
+- `Submission_Format.md` — Report template for PDF submission
 
 ## Notes
 
@@ -217,9 +222,4 @@ Additional documentation available in:
 - All data transformations are reproducible and documented
 - The model achieves {{ stats.accuracy if stats else 'high' }} accuracy on the test set
 - Geographic validation ensures predictions are within Cundinamarca bounds
-
-## Author
-
-**Joan Moreno** — Cundinamarca, Colombia  
-VIIRS/SUOMI-NPP Light Pollution Classification Project
 
