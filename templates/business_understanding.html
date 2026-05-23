@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LightScan · Business Understanding</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+  {% include 'navbar.html' %}
+  <main class="container mt-5">
+    <div class="mb-4">
+      <span class="badge bg-info text-dark mb-2">CRISP-ML · Business Understanding</span>
+      <h1>Business Understanding</h1>
+      <p class="lead text-muted">Define the problem, business objectives, feasibility, risks, and expected impact of the light pollution classification project.</p>
+    </div>
+
+    <div class="row gy-4">
+      <div class="col-lg-7">
+        <div class="card bg-dark bg-gradient border-secondary text-white h-100">
+          <div class="card-body">
+            <h2 class="h5">Problem Context</h2>
+            <p class="text-muted">Artificial nighttime lighting is a growing environmental concern affecting ecosystems, astronomy, and human health. This project analyzes nighttime light pollution in Cundinamarca, Colombia using VIIRS/SUOMI-NPP satellite radiance data to classify zones and enable evidence-based environmental monitoring.</p>
+          </div>
+        </div>
+
+        <div class="card bg-dark bg-gradient border-secondary text-white mt-4">
+          <div class="card-body">
+            <h2 class="h5">Business Objectives</h2>
+            <ul class="text-muted">
+              <li><strong>Quantify:</strong> Measure and map nighttime radiance distribution across Cundinamarca.</li>
+              <li><strong>Classify:</strong> Assign each location to a light pollution zone (six categories from pristine to metropolitan).</li>
+              <li><strong>Enable:</strong> Provide a scalable prediction API for future monitoring and decision-making.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card bg-dark bg-gradient border-secondary text-white mt-4">
+          <div class="card-body">
+            <h2 class="h5">Key Business Questions</h2>
+            <ul class="text-muted">
+              <li>How does light pollution vary across urban, suburban, and rural zones in Cundinamarca?</li>
+              <li>Which areas have pristine night skies suitable for astronomical observation?</li>
+              <li>Can we accurately classify new locations based on radiance alone?</li>
+              <li>How can this classification support environmental and urban planning decisions?</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <div class="card bg-dark bg-gradient border-secondary text-white mb-4">
+          <div class="card-body">
+            <h2 class="h5">Project Feasibility</h2>
+            <ul class="text-muted small">
+              <li><strong>✓ Data Available:</strong> 8,360+ VIIRS observations with complete radiance values.</li>
+              <li><strong>✓ Technical Feasibility:</strong> Standard ML classification techniques applicable.</li>
+              <li><strong>✓ Implementation Timeline:</strong> 3-phase CRISP-ML approach achievable in academic timeframe.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card bg-black border-secondary text-white mb-4">
+          <div class="card-body">
+            <h2 class="h5">Risks &amp; Limitations</h2>
+            <ul class="text-muted small">
+              <li><strong>Data:</strong> Radiance alone may not capture all nuances; cloud cover can bias observations.</li>
+              <li><strong>Model:</strong> Classification rules are threshold-based; boundary cases may be ambiguous.</li>
+              <li><strong>Scope:</strong> Analysis limited to Cundinamarca; generalization to other regions untested.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card bg-black border-secondary text-white">
+          <div class="card-body">
+            <h2 class="h5">Expected Impact</h2>
+            <ul class="text-muted small">
+              <li><strong>Environmental:</strong> Baseline for light pollution monitoring and sky quality assessment.</li>
+              <li><strong>Urban Planning:</strong> Data-driven insights for sustainable urban design.</li>
+              <li><strong>Science:</strong> Resource for astronomers identifying optimal observation sites.</li>
+              <li><strong>Success Metric:</strong> Accuracy ≥ 85% on test set; interpretable zone assignments.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-5">
+      <a href="{{ url_for('index') }}" class="btn btn-outline-info">← Home</a>
+      <a href="{{ url_for('data_understanding') }}" class="btn btn-info text-dark">Next: Data Understanding →</a>
+    </div>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,371 +1,108 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LightScan · Fase 1 · Entendimiento de Datos</title>
+  <title>LightScan · Fase 1 · Data Understanding</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
-
 <body>
-
   {% include 'navbar.html' %}
-
-  <!-- ── HERO FASE 1 ── -->
-    <div class="container">
-      <div class="hero-tag">CRISP-DM · Fase 1 de 3</div>
-      <h1>Entendimiento <span>de Datos</span></h1>
-      <p class="hero-sub">Exploración y análisis del dataset VIIRS/SUOMI-NPP · Cundinamarca, Colombia</p>
+  <main class="container mt-5">
+    <div class="mb-4">
+      <span class="badge bg-info text-dark mb-2">CRISP-ML · Fase 1</span>
+      <h1>Data Understanding</h1>
+      <p class="lead text-muted">Explorar el dataset, validar su calidad y documentar los patrones clave antes de avanzar al modelado.</p>
     </div>
 
-  <!-- ========================= -->
-  <!-- BUSINESS UNDERSTANDING -->
-  <!-- ========================= -->
-
-  <section class="ls-business-section">
-
-    <div class="ls-business-header">
-  
-
-      <h2 class="ls-business-title">
-        Objetivos del Negocio
-      </h2>
-
-      <p class="ls-business-subtitle">
-        Análisis ambiental de contaminación lumínica utilizando datos satelitales VIIRS en Cundinamarca.
-      </p>
-    </div>
-
-    <div class="ls-business-content">
-
-      <p class="ls-business-text">
-        Light pollution has become an increasing environmental problem in urban and semi-urban areas due to the
-        excessive and uncontrolled use of artificial lighting during nighttime. High levels of light pollution can
-        negatively affect ecosystems, human health, energy consumption, and the visibility of the night sky.
-      </p>
-
-      <p class="ls-business-text">
-        In Cundinamarca, the growth of urban areas and nighttime infrastructure has generated significant variations in
-        light intensity between municipalities and populated sectors. However, identifying and analyzing these areas
-        manually is difficult because of the large amount of geographic and environmental information involved.
-      </p>
-
-      <p class="ls-business-text">
-        The purpose of this project is to analyze nighttime light pollution levels in Cundinamarca using open satellite
-        data in order to identify areas with low, medium, and high levels of artificial illumination. Through the
-        analysis of satellite information, the project seeks to provide a better understanding of how light pollution is
-        distributed geographically across the region.
-      </p>
-
-      <p class="ls-business-text">
-        This project aims to support environmental analysis and territorial studies by generating organized and
-        interpretable information that can help identify critical areas affected by excessive nighttime lighting.
-      </p>
-
-      <h2 class="ls-business-title">
-        Key Questions
-      </h2>
-
-      <p class="ls-business-text">
-        The project seeks to answer the following questions:
-      <p> 1. Which areas of Cundinamarca present the highest levels of nighttime light pollution? </p>
-      <p> 2. Is it possible to identify patterns of artificial lighting using satellite data?</p>
-      <p> 3. How are light intensity levels geographically distributed across the region?</p>
-      <p> 4. Can satellite radiance values be used to classify pollution levels effectively?</p>
-      <p> 5. What areas present low, medium, or high concentrations of nighttime artificial light?</p>
-      </p>
-
-      <h2 class="ls-business-title">
-        Data Evaluation
-      </h2>
-
-      <p class="ls-business-text">
-        The project uses open satellite data related to nighttime light intensity collected from the VIIRS Nighttime
-        Lights program. These data provide information about the amount of artificial illumination detected in different
-        geographic locations during nighttime.
-
-      <p>The available data include geographic coordinates and radiance intensity values that represent the level of
-        light emitted in specific areas.</p>
-
-      <p class="ls-business-text">The dataset is considered appropriate for the project because:</p>
-
-      <p>1. It comes from reliable scientific and official sources.</p>
-      <p>2. It contains environmental and geographic information relevant to the problem.</p>
-      <p>3. The data allow the identification of variations in nighttime light intensity.</p>
-      <p>4. The information is structured and suitable for analysis.</p>
-
-
-      <p class="ls-business-text"> Additionally, the dataset provides enough information to identify potential
-        differences between urban and rural
-        areas in terms of artificial lighting concentration.</p>
-
-      <p>Before analysis, the data may require cleaning and validation processes to ensure consistency and reliability.
-      </p>
-      </p>
-      <p></p>
-      <h2 class="ls-business-title">
-        Feasibility Analysis
-      </h2>
-      <h3>Technical Feasibility</h3>
-      <p class="ls-business-text">
-        The project is technically feasible because open satellite data related to nighttime illumination are publicly
-        available and accessible for analysis.
-
-      <p>The information obtained provides measurable radiance values that can be used to study variations in light
-        pollution across geographic areas. Furthermore, the available data contain sufficient records to support
-        environmental classification and analysis processes.</p>
-
-      <p>The project does not require specialized hardware infrastructure because the analysis can be performed using
-        standard computational resources.</p>
-      </p>
-
-      <h2 class="ls-business-title">
-        Organizational Feasibility
-      </h2>
-
-      <p class="ls-business-text">
-        The project is viable in an academic and research context because it is based on publicly available
-        environmental data and focuses on the analysis of a current environmental issue.
-      <p>In addition, the study can contribute to environmental awareness and provide useful information for future
-        urban and territorial studies related to sustainable development and environmental management.</p>
-      </p>
-
-      <h2 class="ls-business-title">Risks and Limitations</h2>
-      <p class="ls-business-text">
-      <p>Some limitations and risks associated with the project include:</p>
-
-      <p>1. Variations in satellite measurements over time.</p>
-      <p>2. Possible inconsistencies in geographic coverage.</p>
-      <p>3. Dependence on the quality and availability of satellite data.</p>
-      <p>4. Difficulty in validating certain environmental conditions directly on-site.</p>
-      <p>5. Limitations in representing all environmental factors associated with light pollution.</p>
-      </p>
-
-      <p class="ls-business-text">
-        Despite these limitations, the available data provide sufficient information to carry out a meaningful
-        environmental analysis of nighttime light pollution in Cundinamarca.
-      </p>
-
-    </div>
-
-  </section>
-  <!-- ── STATS GENERALES ── -->
-  <div class="container mb-4" style="position:relative;z-index:1">
-    <div class="row g-3">
-      <div class="col-6 col-md-3">
-        <div class="stat-card">
-          <div class="stat-val">{{ stats.total_points }}</div>
-          <div class="stat-lbl">Total de puntos</div>
+    <div class="row gy-4">
+      <div class="col-lg-6">
+        <div class="card bg-dark bg-gradient border-secondary text-white h-100">
+          <div class="card-body">
+            <h2 class="h5">Objetivos del análisis</h2>
+            <ul class="text-muted">
+              <li>Revisar la distribución de radiancia y su relación geoespacial.</li>
+              <li>Confirmar la calidad de los valores de radiancia y coordenadas.</li>
+              <li>Entender cómo se agrupan las zonas en el dataset.</li>
+            </ul>
+          </div>
         </div>
       </div>
-      <div class="col-6 col-md-3">
-        <div class="stat-card">
-          <div class="stat-val text-accent">{{ stats.max_rad }}</div>
-          <div class="stat-lbl">Radiancia máx (nW)</div>
-        </div>
-      </div>
-      <div class="col-6 col-md-3">
-        <div class="stat-card">
-          <div class="stat-val">{{ stats.mean_rad }}</div>
-          <div class="stat-lbl">Radiancia media (nW)</div>
-        </div>
-      </div>
-      <div class="col-6 col-md-3">
-        <div class="stat-card">
-          <div class="stat-val">6</div>
-          <div class="stat-lbl">Clases de zona</div>
+      <div class="col-lg-6">
+        <div class="card bg-dark bg-gradient border-secondary text-white h-100">
+          <div class="card-body">
+            <h2 class="h5">Insights clave</h2>
+            <ul class="text-muted">
+              <li>Los valores de avg_rad se transforman en log_rad para reducir el efecto de outliers.</li>
+              <li>La zona se etiqueta mediante umbrales de radiancia adaptados a satélites.</li>
+              <li>Se utiliza dist_bogota como proxy geoespacial para capturar contexto urbano.</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- ── CONTENIDO PRINCIPAL ── -->
-  <div class="container mb-5" style="position:relative;z-index:1">
-    <div class="row g-4">
-
-      <!-- COL IZQUIERDA -->
-      <div class="col-lg-5">
-
-        <!-- Descripción del dataset -->
-        <div class="panel mb-4">
-          <div class="panel-header">
-            <div class="panel-icon" style="background:rgba(0,212,255,.1)">🛰</div>
-            <div class="panel-title">Fuente de Datos · VIIRS</div>
-          </div>
-          <div class="panel-body">
-            <p class="text-dim mb-3" style="font-size:12px;line-height:1.8">
-              Los datos provienen del sensor <b class="text-accent">VIIRS</b> (Visible Infrared Imaging Radiometer
-              Suite)
-              a bordo del satélite <b class="text-accent">SUOMI-NPP</b> de la NASA. Capturan la radiancia
-              nocturna promedio sobre Cundinamarca, Colombia.
-            </p>
-
-            <div class="section-title">Variables del dataset</div>
-
-            <!-- Variable avg_rad -->
-            <div class="zone-legend-item mb-2">
-              <div class="zone-dot" style="background:var(--accent);box-shadow:0 0 6px var(--accent)88"></div>
-              <div style="flex:1">
-                <div class="zone-name mono">avg_rad</div>
-                <div class="zone-pct">Radiancia promedio nocturna · nW/cm²/sr</div>
-                <div class="zone-bar" style="width:100%;background:var(--accent)33;border-left:2px solid var(--accent)">
-                </div>
-              </div>
-            </div>
-
-            <!-- Variable .geo -->
-            <div class="zone-legend-item mb-2">
-              <div class="zone-dot" style="background:var(--accent2);box-shadow:0 0 6px var(--accent2)88"></div>
-              <div style="flex:1">
-                <div class="zone-name mono">.geo</div>
-                <div class="zone-pct">Coordenadas GeoJSON · lon / lat decimal</div>
-                <div class="zone-bar"
-                  style="width:80%;background:var(--accent2)33;border-left:2px solid var(--accent2)"></div>
-              </div>
-            </div>
-
-            <!-- Variables derivadas -->
-            <div class="zone-legend-item mb-2">
-              <div class="zone-dot" style="background:#00FF80;box-shadow:0 0 6px #00FF8088"></div>
-              <div style="flex:1">
-                <div class="zone-name mono">log_rad · dist_bogotá · rad²</div>
-                <div class="zone-pct">Features derivadas para el modelo ML</div>
-                <div class="zone-bar" style="width:60%;background:#00FF8033;border-left:2px solid #00FF80"></div>
-              </div>
-            </div>
-
-            <div class="mt-3 p-3" style="background:var(--bg2);border-radius:8px;border:1px solid var(--border)">
-              <div class="section-title mb-2">Cobertura geográfica</div>
-              <div class="row g-2" style="font-size:11px;color:var(--text-dim)">
-                <div class="col-6">
-                  <span class="text-muted d-block"
-                    style="font-size:9px;text-transform:uppercase;letter-spacing:.1em">Latitud</span>
-                  <span class="mono text-accent">3.70° – 5.80° N</span>
-                </div>
-                <div class="col-6">
-                  <span class="text-muted d-block"
-                    style="font-size:9px;text-transform:uppercase;letter-spacing:.1em">Longitud</span>
-                  <span class="mono text-accent">-74.90° – -73.00° W</span>
-                </div>
-                <div class="col-6">
-                  <span class="text-muted d-block"
-                    style="font-size:9px;text-transform:uppercase;letter-spacing:.1em">Sensor</span>
-                  <span class="mono" style="color:var(--text)">VIIRS / SUOMI-NPP</span>
-                </div>
-                <div class="col-6">
-                  <span class="text-muted d-block"
-                    style="font-size:9px;text-transform:uppercase;letter-spacing:.1em">Unidad</span>
-                  <span class="mono" style="color:var(--text)">nW/cm²/sr</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Distribución por zona -->
-        <div class="panel">
-          <div class="panel-header">
-            <div class="panel-icon" style="background:rgba(0,255,128,.08)">📈</div>
-            <div class="panel-title">Distribución por Zona</div>
-          </div>
-          <div class="panel-body">
-            {% for z in zone_summary %}
-            <div class="zone-legend-item mb-2">
-              <div class="zone-dot" style="background:{{ z.color }};box-shadow:0 0 6px {{ z.color }}88"></div>
-              <div style="flex:1">
-                <div class="zone-name">{{ z.name }}</div>
-                <div class="zone-bar"
-                  style="width:{{ [z.pct * 2, 100]|min }}%;background:{{ z.color }}44;border-left:2px solid {{ z.color }}">
-                </div>
-              </div>
-              <div style="text-align:right">
-                <div class="zone-pct" style="color:{{ z.color }}">{{ z.pct }}%</div>
-                <div style="font-size:9px;color:var(--text-muted)">{{ z.count }} pts</div>
-              </div>
-            </div>
-            {% endfor %}
-          </div>
-        </div>
-
-      </div><!-- /col izquierda -->
-
-      <!-- COL DERECHA -->
+    <div class="row gy-4 mt-4">
       <div class="col-lg-7">
-
-        <!-- Heatmap exploratorio -->
-        <div class="panel mb-4">
-          <div class="panel-header">
-            <div class="panel-icon" style="background:rgba(255,80,0,.08)">🌡</div>
-            <div class="panel-title">Visualización Espacial · Radiancia VIIRS</div>
-            <span class="ms-auto text-dim" style="font-size:10px">Escala logarítmica</span>
-          </div>
-          <div class="panel-body p-0">
-            <div class="heatmap-container">
-              <img src="data:image/png;base64,{{ heatmap_b64 }}"
-                alt="Distribución espacial de radiancia VIIRS en Cundinamarca">
-            </div>
+        <div class="card bg-black border-secondary text-white">
+          <div class="card-body">
+            <h2 class="h5">Mapa de calor VIIRS</h2>
+            <p class="text-muted">Visualiza dónde se concentra la mayor radiancia nocturna en el área de estudio.</p>
+            <img class="img-fluid rounded" src="data:image/png;base64,{{ heatmap_b64 }}" alt="Mapa de calor VIIRS">
           </div>
         </div>
-
-        <!-- Estadísticas descriptivas -->
-        <div class="panel">
-          <div class="panel-header">
-            <div class="panel-icon" style="background:rgba(0,100,255,.1)">📋</div>
-            <div class="panel-title">Estadísticas Descriptivas · avg_rad</div>
-          </div>
-          <div class="panel-body">
-            <div class="row g-3 mb-4">
+      </div>
+      <div class="col-lg-5">
+        <div class="card bg-black border-secondary text-white">
+          <div class="card-body">
+            <h2 class="h5">Estadísticas descriptivas</h2>
+            <div class="row g-3 mt-3">
               {% for label, val in descriptive_stats.items() %}
               <div class="col-6 col-md-4">
-                <div class="stat-card" style="padding:.8rem">
-                  <div class="stat-val" style="font-size:1.3rem">{{ val }}</div>
-                  <div class="stat-lbl">{{ label }}</div>
+                <div class="p-3 rounded" style="background:rgba(255,255,255,.03)">
+                  <div class="fw-bold">{{ val }}</div>
+                  <div class="text-muted small">{{ label }}</div>
                 </div>
               </div>
               {% endfor %}
             </div>
-
-            <!-- Umbrales de clasificación -->
-            <div class="section-title">Umbrales de clasificación (nW/cm²/sr)</div>
-            <div style="font-size:11px;color:var(--text-dim);line-height:2">
-              {% set thresholds = [
-              ('Oscuro Natural', '#000080', '< 0.20'), ('Rural Bajo', '#0040FF' , '0.20 – 0.40' ),
-                ('Suburbano', '#00CFFF' , '0.40 – 1.00' ), ('Urbano Moderado', '#00FF80' , '1.00 – 5.00' ), ('Urbano
-                Alto', '#FFB300' , '5.00 – 20.0' ), ('Metropolitano', '#FF1100' , '> 20.0' ), ] %} {% for name, color,
-                rango in thresholds %} <div class="d-flex align-items-center gap-2 mb-1">
-                <div style="width:10px;height:10px;border-radius:50%;background:{{ color }};flex-shrink:0"></div>
-                <span style="width:140px;color:var(--text)">{{ name }}</span>
-                <span class="mono text-accent">{{ rango }}</span>
-            </div>
-            {% endfor %}
           </div>
         </div>
       </div>
-
-    </div><!-- /col derecha -->
-  </div>
-  </div>
-
-  <!-- ── NAV ENTRE FASES ── -->
-  <div class="container mb-5" style="position:relative;z-index:1">
-    <div class="d-flex justify-content-between align-items-center">
-      <span class="text-dim" style="font-size:11px">Fase 1 de 3 · CRISP-DM</span>
-      <a href="{{ url_for('fase2') }}" class="btn-predict" style="width:auto;padding:.6rem 1.6rem;text-decoration:none">
-        Fase 2 · Modelado ML →
-      </a>
     </div>
-  </div>
 
-  <!-- ── FOOTER ── -->
-  <footer>
-    <div class="container">
-      <p><span>LightScan</span> · Fase 1 · Entendimiento de Datos · <span>Francisco V / JoanMoreno</span></p>
+    <div class="row gy-4 mt-4">
+      <div class="col-12">
+        <div class="card bg-dark bg-gradient border-secondary text-white">
+          <div class="card-body">
+            <h2 class="h5">Distribución por zona</h2>
+            <div class="row row-cols-1 row-cols-md-3 g-3 mt-3">
+              {% for z in zone_summary %}
+              <div class="col">
+                <div class="p-3 rounded" style="background:rgba(255,255,255,.03)">
+                  <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                      <div class="fw-semibold">{{ z.name }}</div>
+                      <div class="text-muted small">{{ z.count }} puntos</div>
+                    </div>
+                    <span class="badge" style="background:{{ z.color }};width:20px;height:20px;border-radius:50%;"></span>
+                  </div>
+                  <div class="text-muted small mt-2">{{ z.pct }}% del dataset</div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  </footer>
 
+    <div class="d-flex justify-content-between align-items-center mt-5">
+      <a href="{{ url_for('business') }}" class="btn btn-outline-info">← Business Understanding</a>
+      <a href="{{ url_for('data_engineering') }}" class="btn btn-info text-dark">Siguiente: Data Engineering →</a>
+    </div>
+  </main>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>

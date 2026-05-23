@@ -17,12 +17,12 @@ from sklearn.model_selection import train_test_split
 # ─────────────────────────────────────────
 
 ZONE_NAMES = {
-    0: "Oscuro Natural",
-    1: "Rural Bajo",
-    2: "Suburbano",
-    3: "Urbano Moderado",
-    4: "Urbano Alto",
-    5: "Metropolitano"
+    0: "Pristine Natural",
+    1: "Rural Low",
+    2: "Suburban",
+    3: "Urban Moderate",
+    4: "Urban High",
+    5: "Metropolitan"
 }
 
 ZONE_COLORS = {
@@ -35,12 +35,12 @@ ZONE_COLORS = {
 }
 
 ZONE_DESC = {
-    0: "Cielo casi prístino. Mínima interferencia lumínica. Ideal para astronomía.",
-    1: "Zona rural con baja densidad. Contaminación lumínica muy leve.",
-    2: "Periferia urbana. Visible el brillo en el horizonte desde la ciudad.",
-    3: "Zona residencial o industrial moderada. Estrellas limitadas.",
-    4: "Centro urbano denso. Cielo naranja. Alta contaminación lumínica.",
-    5: "Núcleo metropolitano. Radiancia extrema. Cielo completamente brillante."
+    0: "Nearly pristine sky. Minimal light interference. Ideal for astronomy.",
+    1: "Rural area with low density. Very light pollution.",
+    2: "Urban periphery. City glow visible on the horizon.",
+    3: "Moderate residential or industrial area. Limited visible stars.",
+    4: "Dense urban center. Orange sky. High light pollution.",
+    5: "Metropolitan core. Extreme radiance. Completely bright sky."
 }
 
 # Coordenadas de referencia — centroide Bogotá
@@ -53,7 +53,7 @@ GEO_BOUNDS = {
     "lon_min": -75.0, "lon_max": -72.9
 }
 
-DATA_PATH = os.path.join(os.path.dirname(__file__), "data.csv")
+DATA_PATH = os.path.join(os.path.dirname(__file__), "data_prepared.csv")
 
 
 # ─────────────────────────────────────────
@@ -145,6 +145,8 @@ class LightPollutionClassifier:
         self.accuracy  = 0.0
         self.df        = None          # dataset completo con predicciones
         self._trained  = False
+        self.y_test    = None          # para ROC curve
+        self.y_proba_test = None       # para ROC curve
 
     # ── ENTRENAMIENTO ──────────────────────
 
@@ -177,6 +179,10 @@ class LightPollutionClassifier:
         # 5. Evaluar
         y_pred = self.clf.predict(X_test)
         self.accuracy = float((y_pred == y_test).mean())
+        
+        # Store test data for ROC curve
+        self.y_test = y_test
+        self.y_proba_test = self.clf.predict_proba(X_test)
 
         # 6. Predicción sobre todo el dataset
         df["pred_zone"]  = self.clf.predict(X_scaled)
