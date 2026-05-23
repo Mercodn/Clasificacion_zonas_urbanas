@@ -1,8 +1,4 @@
-# ══════════════════════════════════════════════════════════════
-#  app.py  ·  Light Pollution Classifier
-#  Servidor Flask — lógica de rutas y visualización
-#  JoanMoreno · Cundinamarca VIIRS / SUOMI-NPP
-# ══════════════════════════════════════════════════════════════
+
 
 import os
 import io
@@ -236,6 +232,16 @@ def index():
         heatmap_b64=heatmap_b64,
         zone_names=ZONE_NAMES,
         zone_colors=ZONE_COLORS
+    )
+
+
+@app.route("/prediction-system")
+def prediction_system():
+    return render_template(
+        "prediction_system.html",
+        stats=classifier.get_stats(),
+        zone_summary=classifier.get_zone_summary(),
+        heatmap_b64=_render_heatmap(classifier.get_full_dataframe())
     )
 
 
