@@ -9,8 +9,10 @@ import json
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
-from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
 # ─────────────────────────────────────────
 # CONSTANTES DE DOMINIO
@@ -125,35 +127,60 @@ def build_single_feature(lat: float, lon: float, avg_rad: float) -> pd.DataFrame
 class LightPollutionClassifier:
     """
     Clasificador de contaminación lumínica basado en datos VIIRS.
-    Encapsula entrenamiento, predicción y métricas.
+    Encapsula entrenamiento, comparación de modelos, predicción y métricas.
 
-    Algoritmo: Gradient Boosting Classifier
-    Razón: mejor rendimiento en clasificación con features mixtos
-    (numéricos + geoespaciales), robusto ante outliers de radiancia.
+    Esta implementación entrena tres algoritmos distintos y elige el mejor
+    según la métrica de accuracy en el conjunto de prueba.
     """
 
     FEATURE_NAMES = ["avg_rad", "log_rad", "lat", "lon", "dist_bogota", "rad_sq"]
 
-    def __init__(self):
-        self.scaler    = StandardScaler()
-        self.clf       = GradientBoostingClassifier(
+    MODEL_LIBRARY = {
+        "Gradient Boosting": lambda: GradientBoostingClassifier(
             n_estimators=200,
             learning_rate=0.1,
             max_depth=5,
             random_state=42
-        )
-        self.accuracy  = 0.0
-        self.df        = None          # dataset completo con predicciones
-        self._trained  = False
-        self.y_test    = None          # para ROC curve
-        self.y_proba_test = None       # para ROC curve
+        ),
+        "Random Forest": lambda: RandomForestClassifier(
+            n_estimators=150,
+            max_depth=10,
+            random_state=42,
+            n_jobs=-1
+        ),
+        "Logistic Regression": lambda: LogisticRegression(
+            solver="lbfgs",
+            max_iter=1200,
+            random_state=42
+        ),
+    }
+
+    MODEL_DESCRIPTIONS = {
+        "Gradient Boosting": "Boosted trees that capture non-linear radial and geographic patterns.",
+        "Random Forest": "Bagged tree ensemble that increases robustness and reduces variance.",
+        "Logistic Regression": "Baseline linear model for multi-class classification with calibrated probabilities.",
+    }
+
+    def __init__(self):
+        self.scaler = StandardScaler()
+        self.models = {name: builder() for name, builder in self.MODEL_LIBRARY.items()}
+        self.fitted_models = {}
+        self.model_results = []
+        self.best_model_name = None
+        self.clf = None
+        self.accuracy = 0.0
+        self.df = None          # dataset completo con predicciones
+        self._trained = False
+        self.y_test = None      # para ROC curve
+        self.y_proba_test = None
+        self.y_pred = None
 
     # ── ENTRENAMIENTO ──────────────────────
 
     def train(self, data_path: str = DATA_PATH) -> float:
         """
-        Carga el dataset, entrena el modelo y añade predicciones al DataFrame.
-        Retorna la exactitud sobre el conjunto de prueba (20%).
+        Carga el dataset, entrena los tres modelos y elige el mejor.
+        Retorna la mejor exactitud sobre el conjunto de prueba (20%).
         """
         # 1. Cargar y etiquetar
         df = load_dataset(data_path)
@@ -163,36 +190,59 @@ class LightPollutionClassifier:
         X = build_features(df)
         y = df["zone"]
 
-        X_scaled = self.scaler.fit_transform(X)
-
         # 3. Split train/test
         X_train, X_test, y_train, y_test = train_test_split(
-            X_scaled, y,
+            X, y,
             test_size=0.2,
             random_state=42,
             stratify=y
         )
 
-        # 4. Entrenar
-        self.clf.fit(X_train, y_train)
+        X_train_scaled = self.scaler.fit_transform(X_train)
+        X_test_scaled = self.scaler.transform(X_test)
+        X_scaled = self.scaler.transform(X)
 
-        # 5. Evaluar
-        y_pred = self.clf.predict(X_test)
-        self.accuracy = float((y_pred == y_test).mean())
-        
-        # Store test data for ROC curve
+        # 4. Entrenar cada modelo y registrar métricas
+        self.fitted_models = {}
+        self.model_results = []
+        for name, model in self.models.items():
+            model.fit(X_train_scaled, y_train)
+            y_pred = model.predict(X_test_scaled)
+            proba = model.predict_proba(X_test_scaled)
+
+            accuracy = accuracy_score(y_test, y_pred)
+            precision = precision_score(y_test, y_pred, average="macro", zero_division=0)
+            recall = recall_score(y_test, y_pred, average="macro", zero_division=0)
+            f1 = f1_score(y_test, y_pred, average="macro", zero_division=0)
+
+            self.fitted_models[name] = model
+            self.model_results.append({
+                "name": name,
+                "accuracy": round(accuracy * 100, 1),
+                "precision": round(precision * 100, 1),
+                "recall": round(recall * 100, 1),
+                "f1_score": round(f1 * 100, 1),
+                "description": self.MODEL_DESCRIPTIONS.get(name, ""),
+                "params": model.get_params(),
+            })
+
+        # 5. Seleccionar el mejor modelo
+        self.best_model_name = max(self.model_results, key=lambda r: r["accuracy"])["name"]
+        self.clf = self.fitted_models[self.best_model_name]
         self.y_test = y_test
-        self.y_proba_test = self.clf.predict_proba(X_test)
+        self.y_pred = self.clf.predict(X_test_scaled)
+        self.y_proba_test = self.clf.predict_proba(X_test_scaled)
+        self.accuracy = float(accuracy_score(y_test, self.y_pred))
 
-        # 6. Predicción sobre todo el dataset
-        df["pred_zone"]  = self.clf.predict(X_scaled)
-        df["pred_name"]  = df["pred_zone"].map(ZONE_NAMES)
+        # 6. Predicción sobre todo el dataset con el mejor modelo
+        df["pred_zone"] = self.clf.predict(X_scaled)
+        df["pred_name"] = df["pred_zone"].map(ZONE_NAMES)
         df["pred_color"] = df["pred_zone"].map(ZONE_COLORS)
 
-        self.df       = df
+        self.df = df
         self._trained = True
 
-        print(f"[LightPollutionClassifier] Entrenado · Accuracy: {self.accuracy:.4f}")
+        print(f"[LightPollutionClassifier] Trained best model: {self.best_model_name} · Accuracy: {self.accuracy:.4f}")
         return self.accuracy
 
     # ── PREDICCIÓN ─────────────────────────
@@ -242,10 +292,45 @@ class LightPollutionClassifier:
         return {
             "total_points": len(self.df),
             "accuracy":     round(self.accuracy * 100, 1),
+            "model_name":   self.best_model_name,
             "max_rad":      round(float(self.df["avg_rad"].max()), 3),
             "mean_rad":     round(float(self.df["avg_rad"].mean()), 3),
             "zone_counts":  zone_counts
         }
+
+    def get_model_comparison(self) -> list:
+        """Retorna las métricas comparativas de los modelos entrenados."""
+        self._check_trained()
+        return self.model_results
+
+    def get_best_model_info(self) -> dict:
+        """Retorna información del modelo seleccionado para producción."""
+        self._check_trained()
+        results = {item["name"]: item for item in self.model_results}
+        return results.get(self.best_model_name, {})
+
+    def get_feature_importance(self) -> list:
+        """Retorna importancias de feature para el modelo seleccionado."""
+        self._check_trained()
+        model = self.clf
+        values = None
+        if hasattr(model, "feature_importances_"):
+            values = model.feature_importances_
+        elif hasattr(model, "coef_"):
+            values = np.mean(np.abs(model.coef_), axis=0)
+        else:
+            values = np.zeros(len(self.FEATURE_NAMES))
+
+        importance = [
+            {"name": name, "value": float(values[i])}
+            for i, name in enumerate(self.FEATURE_NAMES)
+        ]
+        importance.sort(key=lambda x: x["value"], reverse=True)
+        total = sum(item["value"] for item in importance) or 1.0
+        for item in importance:
+            item["pct"] = round(item["value"] / total * 100, 1)
+            item["desc"] = ""  # Descriptions can be added at template level if needed.
+        return importance
 
     def get_zone_summary(self) -> list:
         """Retorna lista de zonas con conteo y porcentaje."""

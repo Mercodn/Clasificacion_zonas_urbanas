@@ -14,11 +14,12 @@
         <li class="nav-item"><a class="nav-link" href="{{ url_for('business') }}">Business Understanding</a></li>
         <li class="nav-item"><a class="nav-link" href="{{ url_for('data_understanding') }}">Data Understanding</a></li>
         <li class="nav-item"><a class="nav-link" href="{{ url_for('data_engineering') }}">Data Engineering</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('model_engineering') }}">Model Engineering</a></li>
         <li class="nav-item"><a class="nav-link" href="{{ url_for('evaluation') }}">Model Evaluation</a></li>
       </ul>
     </div>
     <div class="d-none d-lg-flex align-items-center gap-3 ls-nav-right">
-      <span class="ls-badge-model">GradientBoosting · {{ stats.accuracy }}% acc</span>
+      <span class="ls-badge-model">{{ stats.model_name }} · {{ stats.accuracy }}% acc</span>
       <span class="ls-nav-tag">VIIRS / SUOMI-NPP</span>
     </div>
   </div>

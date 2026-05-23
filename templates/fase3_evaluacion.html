@@ -23,7 +23,7 @@
             <ul class="text-muted">
               <li>Accuracy: {{ stats.accuracy }}%</li>
               <li>Total Points Evaluated: {{ stats.total_points }}</li>
-              <li>Model: Gradient Boosting Classifier</li>
+              <li>Selected Model: {{ stats.model_name }}</li>
             </ul>
           </div>
         </div>
@@ -32,6 +32,9 @@
             <h2 class="h5">Prediction API</h2>
             <p class="text-muted small mb-2">POST /predict</p>
             <p class="text-muted">Send JSON with lat, lon, and avg_rad to receive zone prediction, confidence score, and probabilities.</p>
+            <pre class="bg-dark text-white p-3 rounded mt-3" style="font-size:0.85rem; line-height:1.4; overflow-x:auto;"><code>curl -X POST http://localhost:5000/predict \
+  -H "Content-Type: application/json" \
+  -d '{"lat": 4.711, "lon": -74.072, "avg_rad": 15.5}'</code></pre>
           </div>
         </div>
       </div>
