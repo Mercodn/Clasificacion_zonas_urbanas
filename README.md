@@ -223,8 +223,3 @@ Additional documentation available in:
 - The model achieves {{ stats.accuracy if stats else 'high' }} accuracy on the test set
 - Geographic validation ensures predictions are within Cundinamarca bounds
 
-## Author
-
-**Joan Moreno** — Cundinamarca, Colombia  
-VIIRS/SUOMI-NPP Light Pollution Classification Project
-
